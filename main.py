@@ -16,11 +16,9 @@ import pymongo
 
 print("Bot iniciando...")
 
-features = ['SEXO', 'TIPO_PACIENTE', 'EDAD', 'NACIONALIDAD', 'INTUBADO', 'NEUMONIA',
+features = ['SEXO', 'TIPO_PACIENTE', 'EDAD', 'NEUMONIA',
             'EMBARAZO', 'INDIGENA', 'DIABETES', 'EPOC', 'ASMA', 'INMUSUPR', 'HIPERTENSION',
-            'OTRA_COM', 'CARDIOVASCULAR', 'OBESIDAD', 'RENAL_CRONICA', 'TABAQUISMO', 'OTRO_CASO', 'MIGRANTE', 'UCI']
-
-result = ['1', '2']
+            'OTRA_COM', 'CARDIOVASCULAR', 'OBESIDAD', 'RENAL_CRONICA', 'TABAQUISMO', 'OTRO_CASO']
 
 
 def StartCommand(Update, Context):
@@ -55,33 +53,33 @@ def get_database():
         print('OK -- Connected to MongoDB at server %s' % (MONGODB_HOST))
         db = client['kroneBot']
         col = db['persona']
-        DF = pd.DataFrame(list(col.find()))
-        DF = DF.drop([0, 10])
-        DF = DF.reset_index(drop=True)
-        DF.drop('FECHA_SINTOMAS', inplace=True, axis=1)
-        DF.drop('CLASIFICACION_FINAL', inplace=True, axis=1)
-        DF.drop('_id', inplace=True, axis=1)
-        DF = DF.iloc[95800:,]
-        predict_class(DF)
     except pymongo.errors.ServerSelectionTimeoutError as error:
         print('Error with MongoDB connection: %s' % error)
     except pymongo.errors.ConnectionFailure as error:
         print('Could not connect to MongoDB: %s' % error)
 
 
-def predict_class(DF):
+def predict_class():
+    DF = pd.read_csv(r'C:\Users\User\Desktop\kronebot\kroneBot.csv')
     X = DF[features]
     y = DF['RESULTADO_LAB']
+    X.astype('int64')
+    y.astype('int64')
 
-    y = y.astype("int")
-
-    plt.figure(figsize=(15, 6))
+    #plt.figure(figsize=(15, 6))
     dtree = DecisionTreeClassifier()
     dtree = dtree.fit(X, y)
-    tree.plot_tree(dtree, feature_names=features, class_names=result, filled=True)
-    plt.show()
-    plt.savefig('covid.pdf', bbox_inches="tight")
-    # print(f'El resultado es: {result[dtree.predict([["2", "1", "1", "0.221805", "1", "97", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "99", "97"]])[0]]}')
+    #tree.plot_tree(dtree, feature_names=features, class_names=result, filled=True)
+    #plt.show()
+    #plt.savefig('covid.pdf', bbox_inches="tight")
+    from sklearn.tree import export_text
+    r = export_text(dtree, feature_names=features)
+    print(r)
+
+    print(f'El resultado es "1" : {dtree.predict([[1, 2, 35, 2, 2, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2]])[0]}')
+    print(f'El resultado es "2" : {dtree.predict([[2, 2, 52, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2]])[0]}')
+    print(f'El resultado es "1" : {dtree.predict([[2, 1, 36, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2]])[0]}')
+    print(f'El resultado es "2" : {dtree.predict([[2, 2, 45, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2]])[0]}')
 
 
 def Main():
@@ -98,6 +96,5 @@ def Main():
 
 
 if __name__ == '__main__':
-    get_database()
+    predict_class()
     exit()
-
