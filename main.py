@@ -24,8 +24,14 @@ logging.basicConfig(
 
 #features
 features = ['SEXO', 'EDAD', 'NEUMONIA',
-            'EMBARAZO', 'INDIGENA', 'DIABETES', 'EPOC', 'ASMA', 'INMUSUPR', 'HIPERTENSION',
-            'OTRA_COM', 'CARDIOVASCULAR', 'OBESIDAD', 'RENAL_CRONICA', 'TABAQUISMO', 'OTRO_CASO']
+            'EMBARAZO', 'INDIGENA',
+            'DIABETES', 'EPOC', 'ASMA',
+            'INMUSUPR', 'HIPERTENSION',
+            'OTRA_COM', 'CARDIOVASCULAR',
+            'OBESIDAD', 'RENAL_CRONICA',
+            'TABAQUISMO', 'OTRO_CASO']
+
+dictUsers = {}
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +75,7 @@ def get_database():
 
 
 #PREDICTOR
-def predict_class(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16):
+def predict_class(listFeatures):
     DF = pd.read_csv(r'kroneBot.csv')
     X = DF[features]
     y = DF['RESULTADO_LAB']
@@ -91,7 +97,12 @@ def predict_class(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A
     r = export_text(dtree, feature_names=features)
     # print(r)
 
-    answerPredict = {dtree.predict([[A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16]])[0]}
+    answerPredict = {dtree.predict([[int(listFeatures[0]), int(listFeatures[1]), int(listFeatures[2]),
+                                     int(listFeatures[3]), int(listFeatures[4]), int(listFeatures[5]),
+                                     int(listFeatures[6]), int(listFeatures[7]), int(listFeatures[8]),
+                                     int(listFeatures[9]), int(listFeatures[10]), int(listFeatures[11]),
+                                     int(listFeatures[12]), int(listFeatures[13]), int(listFeatures[14]),
+                                     int(listFeatures(16))]])[0]}
     return answerPredict
 
 
@@ -99,6 +110,7 @@ def predict_class(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A
 def start(update: Update, context: CallbackContext, ) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
+    dictUsers[user.username] = []
     update.message.reply_text(
         "Hola, como puedo ayudarte? " + str(user.first_name) + " " + str(user.last_name) + " (@" + str(
             user.username) + ")\nSoy Kronee Bot el cual te puede dar un pronostico de tener covid en base a unas preguntas," \
@@ -134,6 +146,7 @@ def embarazo(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("su sexo %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si estas embarazada " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -151,6 +164,7 @@ def edad(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo embarazo %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir tu edad " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -168,6 +182,7 @@ def neumonia(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo edad %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si cuentas con Neumonia " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -185,6 +200,7 @@ def indigena(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo neumonia %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si eres indigena " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -202,6 +218,7 @@ def diabetes(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo indigena %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si tienes Diabetes " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -219,6 +236,7 @@ def epoc(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo diabetes %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si tienes Enfermedad Pulmonar Cronica " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -236,6 +254,7 @@ def asma(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo epoc %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si tienes Asma " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -252,6 +271,7 @@ def inmusuper(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo asma %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si tienes inmune supresion " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -268,6 +288,7 @@ def hipertension(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo inmune supresion %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si tienes Hipertensionn " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -284,6 +305,7 @@ def otra_com(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo hipertension %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si tienes otra complicacion " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -300,6 +322,7 @@ def cardiovascular(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo otro complicacion %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si tienes enfermedad Cardiovascular " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -316,6 +339,7 @@ def renal_cronica(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo cardiovascular %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si tienes insuficiencia renal cronica " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -332,6 +356,7 @@ def tabaquismo(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo renal cronico %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si fumas con frecuencia " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
@@ -349,6 +374,7 @@ def otro_caso(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo tabaquismo %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
     msg = "Me puedes decir si tuviste contacto con alguien diagnosticado con COVID " + str(user.first_name) + " " + str(user.last_name) + \
           " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
                                                                            " para obtener mas informacion"
@@ -365,7 +391,9 @@ def otro_caso(update: Update, context: CallbackContext) -> int:
 def final(update: Update, context: CallbackContext) -> int:
     user = update.message.chat
     logger.info("tuvo contacto %s: %s", user.first_name, update.message.text)
-    update.message.reply_text("Gracias " + str(user.first_name) + " " + str(user.last_name) + " por tu participacion, estare al pendiente para ti")
+    dictUsers[user.username].append(update.message.text)
+    listFeatures = dictUsers.get(user.username)
+    update.message.reply_text("Gracias " + str(user.first_name) + " " + str(user.last_name) + " por tu participacion, estare al pendiente para ti, tu resultado es_ " + str(predict_class(listFeatures)))
 
     return ConversationHandler.END
 
