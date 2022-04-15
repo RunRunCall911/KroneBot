@@ -1,54 +1,54 @@
-from sklearn.model_selection import train_test_split
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import Constants as keys
-import pandas as pd
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
-from sklearn.tree import DecisionTreeClassifier
+
+import logging
+
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    Filters,
+    ConversationHandler,
+    CallbackContext,
+)
 import pymongo
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.tree import export_text
+import pandas as pd
+from sklearn.metrics import  confusion_matrix
+from sklearn.tree import export_text, DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
 
-print("Bot iniciando...")
+# Enable logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
 
-features = ['SEXO', 'TIPO_PACIENTE', 'EDAD', 'NEUMONIA',
+#features
+features = ['SEXO', 'EDAD', 'NEUMONIA',
             'EMBARAZO', 'INDIGENA', 'DIABETES', 'EPOC', 'ASMA', 'INMUSUPR', 'HIPERTENSION',
             'OTRA_COM', 'CARDIOVASCULAR', 'OBESIDAD', 'RENAL_CRONICA', 'TABAQUISMO', 'OTRO_CASO']
 
+logger = logging.getLogger(__name__)
 
-def StartCommand(Update, Context):
-    Update.message.reply_text('Escribe algo para comenzar')
-
-
-def HelpCommand(Update, Context):
-    Update.message.reply_text('Necesitas mas ayuda? puedes consultar aqui->\n\n'
-                              'Aqui puedes consultar las noticias de covid-19:\n'
-                              '1. http://www.imss.gob.mx/prensa/archivo/202203/105\n'
-                              'Tramites que puedes realizar en el imss digital:\n'
-                              '2. http://www.imss.gob.mx/covid-19/tramites\n'
-                              '¿Tuviste covid?, aqui puedes consultar tratamientos post-covid en el imss digital:\n'
-                              '3. http://www.imss.gob.mx/covid-19/rehabilitacion')
-
-
-def HandleMessage(Update, Context):
-    text = str(Update.message.text).lower()
-    answer = MenuKroneBot(text, Update)
-
-
-    Update.message.reply_text(answer, parse_mode='Markdown')
+CONSENTIMIENTO,\
+SEXO,\
+EDAD,\
+NEUMONIA,\
+EMBARAZO,\
+INDIGENA,\
+DIABETES,\
+EPOC,\
+ASMA,\
+INMUSUPR,\
+HIPERTENSION,\
+OTRA_COM,\
+CARDIOVASCULAR,\
+OBESIDAD,\
+RENAL_CRONICA,\
+TABAQUISMO,\
+OTRO_CASO = range(17)
 
 
-def ImageHandler(Update, Context):
-    file = Update.message.photo[0].file_id
-    obj = Context.bot.get_file(file)
-    obj.download()
-
-    Update.message.reply_text("Image received")
-
-
-def Error(Update, Context):
-    print(f"Update {Update}  Error causado {Context.error}")
-
-
+#DATA BASE
 def get_database():
     MONGODB_HOST = '127.0.0.1'
     MONGODB_PORT = '27017'
@@ -68,8 +68,9 @@ def get_database():
         print('Could not connect to MongoDB: %s' % error)
 
 
-def predict_class():
-    DF = pd.read_csv(r'C:\Users\User\Desktop\kronebot\kroneBot.csv')
+#PREDICTOR
+def predict_class(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16):
+    DF = pd.read_csv(r'kroneBot.csv')
     X = DF[features]
     y = DF['RESULTADO_LAB']
     X.astype('int64')
@@ -79,68 +80,384 @@ def predict_class():
     dtree = dtree.fit(X, y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
     y_hat = dtree.predict(X_test)
-    print(classification_report(y_test, y_hat))
+    # print(classification_report(y_test, y_hat))
     cm = confusion_matrix(y_test, y_hat)
-    print('Confusion matrix\n\n', cm)
-    print('\nTrue Positives(TP) = ', cm[0, 0])
-    print('\nTrue Negatives(TN) = ', cm[1, 1])
-    print('\nFalse Positives(FP) = ', cm[0, 1])
-    print('\nFalse Negatives(FN) = ', cm[1, 0])
-    exit()
+    # print('Confusion matrix\n\n', cm)
+    # print('\nTrue Positives(TP) = ', cm[0, 0])
+    # print('\nTrue Negatives(TN) = ', cm[1, 1])
+    # print('\nFalse Positives(FP) = ', cm[0, 1])
+    # print('\nFalse Negatives(FN) = ', cm[1, 0])
 
     r = export_text(dtree, feature_names=features)
-    print(r)
+    # print(r)
 
-    print(f'El resultado es "1" : {dtree.predict([[1, 2, 35, 2, 2, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2]])[0]}')
-    print(f'El resultado es "2" : {dtree.predict([[2, 2, 52, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2]])[0]}')
-    print(f'El resultado es "1" : {dtree.predict([[2, 1, 36, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2]])[0]}')
-    print(f'El resultado es "2" : {dtree.predict([[2, 2, 45, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2]])[0]}')
+    answerPredict = {dtree.predict([[A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16]])[0]}
+    return answerPredict
 
 
-def MenuKroneBot(input_text, Update):
-    message = str(input_text).lower()
-    answers = []
-    user = Update.message.chat
-    if message in ("ola", "hola", "h0la", "hol4", "ho1a", "kronee bot", "hola, como estas?"):
-
-        return "Hola, como puedo ayudarte? " + str(user.first_name) + " " + str(user.last_name) + " (@" + str(
+#BOT TELEGRAM
+def start(update: Update, context: CallbackContext, ) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    update.message.reply_text(
+        "Hola, como puedo ayudarte? " + str(user.first_name) + " " + str(user.last_name) + " (@" + str(
             user.username) + ")\nSoy Kronee Bot el cual te puede dar un pronostico de tener covid en base a unas preguntas," \
                              " Quieres continuar?\n\n" \
                              "1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
                                                                                          " para obtener mas informacion"
+        ,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
+        ),
+    )
+
+    return CONSENTIMIENTO
 
 
-    if message in ("Krone Bot", "como estas?", "1", "2"):
-        return "Soy Krone Bot"
-
-    return "No te entiendo"
-
-
-def QuestionCovid(input_text):
-    message = str(input_text).lower()
-    if message == "1":
-        print("hola1")
-        return "hola"
-    if message == "2":
-        print("hola2")
-        return "hola"
-    else:
-        print("Solo Numeros")
-        return "hola"
+def sexo(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("acepto la conversacion %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir tu sexo " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) MACULINO\n2) FEMENINO\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                                     " para obtener mas informacion"
+        ,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
+        ),
+    )
+    return SEXO
 
 
-def Main():
+def embarazo(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("su sexo %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si estas embarazada " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                                     " para obtener mas informacion"
+        ,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
+        ),
+    )
+
+    return  EMBARAZO
+
+
+def edad(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo embarazo %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir tu edad " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                                     " para obtener mas informacion"
+        ,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
+        ),
+    )
+
+    return EDAD
+
+
+def neumonia(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo edad %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si cuentas con Neumonia " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion"
+        ,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return NEUMONIA
+
+
+def indigena(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo neumonia %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si eres indigena " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion"
+        ,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return INDIGENA
+
+
+def diabetes(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo indigena %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si tienes Diabetes " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion"
+        ,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return DIABETES
+
+
+def epoc(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo diabetes %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si tienes Enfermedad Pulmonar Cronica " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion"
+        ,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return EPOC
+
+
+def asma(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo epoc %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si tienes Asma " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return ASMA
+
+
+def inmusuper(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo asma %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si tienes inmune supresion " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return INMUSUPR
+
+
+def hipertension(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo inmune supresion %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si tienes Hipertensionn " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return HIPERTENSION
+
+
+def otra_com(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo hipertension %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si tienes otra complicacion " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return OTRA_COM
+
+
+def cardiovascular(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo otro complicacion %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si tienes enfermedad Cardiovascular " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return CARDIOVASCULAR
+
+
+def renal_cronica(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo cardiovascular %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si tienes insuficiencia renal cronica " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return RENAL_CRONICA
+
+
+def tabaquismo(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo renal cronico %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si fumas con frecuencia " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion"
+        ,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+    )
+
+    return TABAQUISMO
+
+
+def otro_caso(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("tuvo tabaquismo %s: %s", user.first_name, update.message.text)
+    msg = "Me puedes decir si tuviste contacto con alguien diagnosticado con COVID " + str(user.first_name) + " " + str(user.last_name) + \
+          " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                           " para obtener mas informacion"
+    update.message.reply_text(
+        msg,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
+        ),
+    )
+
+    return OTRO_CASO
+
+
+def final(update: Update, context: CallbackContext) -> int:
+    user = update.message.chat
+    logger.info("tuvo contacto %s: %s", user.first_name, update.message.text)
+    update.message.reply_text("Gracias " + str(user.first_name) + " " + str(user.last_name) + " por tu participacion, estare al pendiente para ti")
+
+    return ConversationHandler.END
+
+# def photo(update: Update, context: CallbackContext) -> int:
+#     """Stores the photo and asks for a location."""
+#     user = update.message.from_user
+#     photo_file = update.message.photo[-1].get_file()
+#     photo_file.download('user_photo.jpg')
+#     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
+#     update.message.reply_text(
+#         'Gorgeous! Now, send me your location please, or send /skip if you don\'t want to.'
+#     )
+#
+#     return LOCATION
+#
+#
+# def skip_photo(update: Update, context: CallbackContext) -> int:
+#     """Skips the photo and asks for a location."""
+#     user = update.message.from_user
+#     logger.info("User %s did not send a photo.", user.first_name)
+#     update.message.reply_text(
+#         'I bet you look great! Now, send me your location please, or send /skip.'
+#     )
+#
+#     return LOCATION
+
+
+def bio(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user
+    logger.info("Bio of %s: %s", user.first_name, update.message.text)
+    update.message.reply_text('Thank you! I hope we can talk again some day.')
+
+    return ConversationHandler.END
+
+
+def cancel(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user
+    logger.info("User %s canceled the conversation.", user.first_name)
+    update.message.reply_text(
+        'Bye! I hope we can talk again some day.', reply_markup=ReplyKeyboardRemove()
+    )
+
+    return ConversationHandler.END
+
+
+def HelpCommand(Update, Context):
+    Update.message.reply_text('Necesitas mas ayuda? puedes consultar aqui->\n\n'
+                              'Aqui puedes consultar las noticias de covid-19:\n'
+                              '1. http://www.imss.gob.mx/prensa/archivo/202203/105\n'
+                              'Tramites que puedes realizar en el imss digital:\n'
+                              '2. http://www.imss.gob.mx/covid-19/tramites\n'
+                              '¿Tuviste covid?, aqui puedes consultar tratamientos post-covid en el imss digital:\n'
+                              '3. http://www.imss.gob.mx/covid-19/rehabilitacion')
+
+def main() -> None:
     updater = Updater(keys.API_KEY, use_context=True)
-    dp = updater.dispatcher
 
-    dp.add_handler(CommandHandler("start", StartCommand))
-    dp.add_handler(CommandHandler("help", HelpCommand))
+    # Get the dispatcher to register handlers
+    dispatcher = updater.dispatcher
 
-    dp.add_handler(MessageHandler(Filters.text, HandleMessage))
+    # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+        states={
+            CONSENTIMIENTO  : [MessageHandler(Filters.regex('^(1|2)$'), sexo)],
+            SEXO            : [MessageHandler(Filters.regex('^(1|2)$'), embarazo)],
+            EMBARAZO        : [MessageHandler(Filters.regex('^(1|2)$'), edad)],
+            EDAD            : [MessageHandler(Filters.regex('^(1|2)$'), neumonia)],
+            NEUMONIA        : [MessageHandler(Filters.regex('^(1|2)$'), indigena)],
+            INDIGENA        : [MessageHandler(Filters.regex('^(1|2)$'), diabetes)],
+            DIABETES        : [MessageHandler(Filters.regex('^(1|2)$'), epoc)],
+            EPOC            : [MessageHandler(Filters.regex('^(1|2)$'), asma)],
+            ASMA            : [MessageHandler(Filters.regex('^(1|2)$'), inmusuper)],
+            INMUSUPR        : [MessageHandler(Filters.regex('^(1|2)$'), hipertension)],
+            HIPERTENSION    : [MessageHandler(Filters.regex('^(1|2)$'), otra_com)],
+            OTRA_COM        : [MessageHandler(Filters.regex('^(1|2)$'), cardiovascular)],
+            CARDIOVASCULAR  : [MessageHandler(Filters.regex('^(1|2)$'), renal_cronica)],
+            RENAL_CRONICA   : [MessageHandler(Filters.regex('^(1|2)$'), tabaquismo)],
+            TABAQUISMO      : [MessageHandler(Filters.regex('^(1|2)$'), otro_caso)],
+            OTRO_CASO       : [MessageHandler(Filters.regex('^(1|2)$'), final)],
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+    )
+
+    dispatcher.add_handler(CommandHandler("help", HelpCommand))
+
+    dispatcher.add_handler(conv_handler)
 
     updater.start_polling()
+
     updater.idle()
 
 
 if __name__ == '__main__':
-    Main()
+    main()
