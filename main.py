@@ -13,7 +13,7 @@ from telegram.ext import (
 )
 import pymongo
 import pandas as pd
-from sklearn.metrics import  confusion_matrix
+from sklearn.metrics import confusion_matrix
 from sklearn.tree import export_text, DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 
@@ -22,7 +22,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 
-#features
+# features
 features = ['SEXO', 'EDAD', 'NEUMONIA',
             'EMBARAZO', 'INDIGENA',
             'DIABETES', 'EPOC', 'ASMA',
@@ -35,26 +35,26 @@ dictUsers = {}
 
 logger = logging.getLogger(__name__)
 
-CONSENTIMIENTO,\
-SEXO,\
-EDAD,\
-NEUMONIA,\
-EMBARAZO,\
-INDIGENA,\
-DIABETES,\
-EPOC,\
-ASMA,\
-INMUSUPR,\
-HIPERTENSION,\
-OTRA_COM,\
-CARDIOVASCULAR,\
-OBESIDAD,\
-RENAL_CRONICA,\
-TABAQUISMO,\
+CONSENTIMIENTO, \
+SEXO, \
+EDAD, \
+NEUMONIA, \
+EMBARAZO, \
+INDIGENA, \
+DIABETES, \
+EPOC, \
+ASMA, \
+INMUSUPR, \
+HIPERTENSION, \
+OTRA_COM, \
+CARDIOVASCULAR, \
+OBESIDAD, \
+RENAL_CRONICA, \
+TABAQUISMO, \
 OTRO_CASO = range(17)
 
 
-#DATA BASE
+# DATA BASE
 def get_database():
     MONGODB_HOST = '127.0.0.1'
     MONGODB_PORT = '27017'
@@ -74,9 +74,9 @@ def get_database():
         print('Could not connect to MongoDB: %s' % error)
 
 
-#PREDICTOR
+# PREDICTOR
 def predict_class(listFeatures):
-    DF = pd.read_csv(r'kroneBot.csv')
+    DF = pd.read_csv(r'C:\Users\User\Desktop\kronebot\kroneBot.csv')
     X = DF[features]
     y = DF['RESULTADO_LAB']
     X.astype('int64')
@@ -84,29 +84,23 @@ def predict_class(listFeatures):
 
     dtree = DecisionTreeClassifier()
     dtree = dtree.fit(X, y)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
-    y_hat = dtree.predict(X_test)
+    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+    #y_hat = dtree.predict(X_test)
     # print(classification_report(y_test, y_hat))
-    cm = confusion_matrix(y_test, y_hat)
+    #cm = confusion_matrix(y_test, y_hat)
     # print('Confusion matrix\n\n', cm)
     # print('\nTrue Positives(TP) = ', cm[0, 0])
     # print('\nTrue Negatives(TN) = ', cm[1, 1])
     # print('\nFalse Positives(FP) = ', cm[0, 1])
     # print('\nFalse Negatives(FN) = ', cm[1, 0])
 
-    r = export_text(dtree, feature_names=features)
+    #r = export_text(dtree, feature_names=features)
     # print(r)
-
-    answerPredict = {dtree.predict([[int(listFeatures[0]), int(listFeatures[1]), int(listFeatures[2]),
-                                     int(listFeatures[3]), int(listFeatures[4]), int(listFeatures[5]),
-                                     int(listFeatures[6]), int(listFeatures[7]), int(listFeatures[8]),
-                                     int(listFeatures[9]), int(listFeatures[10]), int(listFeatures[11]),
-                                     int(listFeatures[12]), int(listFeatures[13]), int(listFeatures[14]),
-                                     int(listFeatures(16))]])[0]}
-    return answerPredict
+    print(f'El resultado es: {dtree.predict([[int(listFeatures[0]), 32, int(listFeatures[2]),int(listFeatures[3]), int(listFeatures[4]), int(listFeatures[5]), int(listFeatures[6]), int(listFeatures[7]), int(listFeatures[8]), int(listFeatures[9]), int(listFeatures[10]), int(listFeatures[11]), int(listFeatures[12]), int(listFeatures[13]), int(listFeatures[14]), int(listFeatures[15])]])[0]}')
+    return 1
 
 
-#BOT TELEGRAM
+# BOT TELEGRAM
 def start(update: Update, context: CallbackContext, ) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
@@ -150,14 +144,14 @@ def embarazo(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(
         "Me puedes decir si estas embarazada " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                                     " para obtener mas informacion"
+                                                                         " para obtener mas informacion"
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
         ),
     )
 
-    return  EMBARAZO
+    return EMBARAZO
 
 
 def edad(update: Update, context: CallbackContext) -> int:
@@ -168,7 +162,7 @@ def edad(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(
         "Me puedes decir tu edad " + str(user.first_name) + " " + str(user.last_name) + \
         " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                                     " para obtener mas informacion"
+                                                                         " para obtener mas informacion"
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
@@ -335,10 +329,28 @@ def cardiovascular(update: Update, context: CallbackContext) -> int:
     return CARDIOVASCULAR
 
 
-def renal_cronica(update: Update, context: CallbackContext) -> int:
+def obesidad(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo cardiovascular %s: %s", user.first_name, update.message.text)
+    dictUsers[user.username].append(update.message.text)
+    update.message.reply_text(
+        "Me puedes decir si tienes obesidad " + str(user.first_name) + " " + str(user.last_name) + \
+        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                         " para obtener mas informacion",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True
+        ),
+        )
+
+    return OBESIDAD
+
+
+
+def renal_cronica(update: Update, context: CallbackContext) -> int:
+    reply_keyboard = [['1', '2']]
+    user = update.message.chat
+    logger.info("es obeso el hdsptm %s: %s", user.first_name, update.message.text)
     dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir si tienes insuficiencia renal cronica " + str(user.first_name) + " " + str(user.last_name) + \
@@ -375,7 +387,8 @@ def otro_caso(update: Update, context: CallbackContext) -> int:
     user = update.message.chat
     logger.info("tuvo tabaquismo %s: %s", user.first_name, update.message.text)
     dictUsers[user.username].append(update.message.text)
-    msg = "Me puedes decir si tuviste contacto con alguien diagnosticado con COVID " + str(user.first_name) + " " + str(user.last_name) + \
+    msg = "Me puedes decir si tuviste contacto con alguien diagnosticado con COVID " + str(user.first_name) + " " + str(
+        user.last_name) + \
           " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
                                                                            " para obtener mas informacion"
     update.message.reply_text(
@@ -393,9 +406,12 @@ def final(update: Update, context: CallbackContext) -> int:
     logger.info("tuvo contacto %s: %s", user.first_name, update.message.text)
     dictUsers[user.username].append(update.message.text)
     listFeatures = dictUsers.get(user.username)
-    update.message.reply_text("Gracias " + str(user.first_name) + " " + str(user.last_name) + " por tu participacion, estare al pendiente para ti, tu resultado es_ " + str(predict_class(listFeatures)))
+    update.message.reply_text("Gracias " + str(user.first_name) + " " + str(
+        user.last_name) + " por tu participacion, estare al pendiente para ti, tu resultado es: " + str(
+        predict_class(listFeatures)))
 
     return ConversationHandler.END
+
 
 # def photo(update: Update, context: CallbackContext) -> int:
 #     """Stores the photo and asks for a location."""
@@ -448,6 +464,7 @@ def HelpCommand(Update, Context):
                               '¿Tuviste covid?, aqui puedes consultar tratamientos post-covid en el imss digital:\n'
                               '3. http://www.imss.gob.mx/covid-19/rehabilitacion')
 
+
 def main() -> None:
     updater = Updater(keys.API_KEY, use_context=True)
 
@@ -458,22 +475,23 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-            CONSENTIMIENTO  : [MessageHandler(Filters.regex('^(1|2)$'), sexo)],
-            SEXO            : [MessageHandler(Filters.regex('^(1|2)$'), embarazo)],
-            EMBARAZO        : [MessageHandler(Filters.regex('^(1|2)$'), edad)],
-            EDAD            : [MessageHandler(Filters.regex('^(1|2)$'), neumonia)],
-            NEUMONIA        : [MessageHandler(Filters.regex('^(1|2)$'), indigena)],
-            INDIGENA        : [MessageHandler(Filters.regex('^(1|2)$'), diabetes)],
-            DIABETES        : [MessageHandler(Filters.regex('^(1|2)$'), epoc)],
-            EPOC            : [MessageHandler(Filters.regex('^(1|2)$'), asma)],
-            ASMA            : [MessageHandler(Filters.regex('^(1|2)$'), inmusuper)],
-            INMUSUPR        : [MessageHandler(Filters.regex('^(1|2)$'), hipertension)],
-            HIPERTENSION    : [MessageHandler(Filters.regex('^(1|2)$'), otra_com)],
-            OTRA_COM        : [MessageHandler(Filters.regex('^(1|2)$'), cardiovascular)],
-            CARDIOVASCULAR  : [MessageHandler(Filters.regex('^(1|2)$'), renal_cronica)],
-            RENAL_CRONICA   : [MessageHandler(Filters.regex('^(1|2)$'), tabaquismo)],
-            TABAQUISMO      : [MessageHandler(Filters.regex('^(1|2)$'), otro_caso)],
-            OTRO_CASO       : [MessageHandler(Filters.regex('^(1|2)$'), final)],
+            CONSENTIMIENTO: [MessageHandler(Filters.regex('^(1|2)$'), sexo)],
+            SEXO: [MessageHandler(Filters.regex('^(1|2)$'), embarazo)],
+            EMBARAZO: [MessageHandler(Filters.regex('^(1|2)$'), edad)],
+            EDAD: [MessageHandler(Filters.regex('^(1|2)$'), neumonia)],
+            NEUMONIA: [MessageHandler(Filters.regex('^(1|2)$'), indigena)],
+            INDIGENA: [MessageHandler(Filters.regex('^(1|2)$'), diabetes)],
+            DIABETES: [MessageHandler(Filters.regex('^(1|2)$'), epoc)],
+            EPOC: [MessageHandler(Filters.regex('^(1|2)$'), asma)],
+            ASMA: [MessageHandler(Filters.regex('^(1|2)$'), inmusuper)],
+            INMUSUPR: [MessageHandler(Filters.regex('^(1|2)$'), obesidad)],
+            OBESIDAD: [MessageHandler(Filters.regex('^(1|2)$'), hipertension)],
+            HIPERTENSION: [MessageHandler(Filters.regex('^(1|2)$'), otra_com)],
+            OTRA_COM: [MessageHandler(Filters.regex('^(1|2)$'), cardiovascular)],
+            CARDIOVASCULAR: [MessageHandler(Filters.regex('^(1|2)$'), renal_cronica)],
+            RENAL_CRONICA: [MessageHandler(Filters.regex('^(1|2)$'), tabaquismo)],
+            TABAQUISMO: [MessageHandler(Filters.regex('^(1|2)$'), otro_caso)],
+            OTRO_CASO: [MessageHandler(Filters.regex('^(1|2)$'), final)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
