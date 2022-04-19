@@ -84,17 +84,17 @@ def predict_class(listFeatures):
 
     dtree = DecisionTreeClassifier()
     dtree = dtree.fit(X, y)
-    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
-    #y_hat = dtree.predict(X_test)
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+    # y_hat = dtree.predict(X_test)
     # print(classification_report(y_test, y_hat))
-    #cm = confusion_matrix(y_test, y_hat)
+    # cm = confusion_matrix(y_test, y_hat)
     # print('Confusion matrix\n\n', cm)
     # print('\nTrue Positives(TP) = ', cm[0, 0])
     # print('\nTrue Negatives(TN) = ', cm[1, 1])
     # print('\nFalse Positives(FP) = ', cm[0, 1])
     # print('\nFalse Negatives(FN) = ', cm[1, 0])
 
-    #r = export_text(dtree, feature_names=features)
+    # r = export_text(dtree, feature_names=features)
     # print(r)
     print(f'El resultado es: {dtree.predict([[int(listFeatures[0]), 32, int(listFeatures[2]),int(listFeatures[3]), int(listFeatures[4]), int(listFeatures[5]), int(listFeatures[6]), int(listFeatures[7]), int(listFeatures[8]), int(listFeatures[9]), int(listFeatures[10]), int(listFeatures[11]), int(listFeatures[12]), int(listFeatures[13]), int(listFeatures[14]), int(listFeatures[15])]])[0]}')
     return 1
@@ -126,8 +126,7 @@ def sexo(update: Update, context: CallbackContext) -> int:
     logger.info("acepto la conversacion %s: %s", user.first_name, update.message.text)
     update.message.reply_text(
         "Me puedes decir tu sexo " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) MACULINO\n2) FEMENINO\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                                     " para obtener mas informacion"
+        " \n\n¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
@@ -140,18 +139,29 @@ def embarazo(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("su sexo %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
-    update.message.reply_text(
-        "Me puedes decir si estas embarazada " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion"
-        ,
-        reply_markup=ReplyKeyboardMarkup(
-            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
-        ),
-    )
+    print(update.message.text)
+    if update.message.text == 'Femenino':
+        dictUsers[user.username].append(1)
+        update.message.reply_text(
+            "Me puedes decir si estas embarazada " + str(user.first_name) + " " + str(user.last_name) + \
+            " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                             " para obtener mas informacion"
+            ,
+            reply_markup=ReplyKeyboardMarkup(
+                reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
+            ),
+        )
+    elif update.message.text == 'Masculino':
+        dictUsers[user.username].append(2)
+        update.message.reply_text(
+            " " + str(user.first_name) + " " + str(user.last_name) + \
+            "toca aqui por favor para avanzar ==> /skip." + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                                                                     " para obtener mas informacion"
+            ,
+        )
 
     return EMBARAZO
+
 
 
 def edad(update: Update, context: CallbackContext) -> int:
@@ -161,12 +171,7 @@ def edad(update: Update, context: CallbackContext) -> int:
     dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Me puedes decir tu edad " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion"
-        ,
-        reply_markup=ReplyKeyboardMarkup(
-            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
-        ),
+        "\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
     )
 
     return EDAD
@@ -341,10 +346,9 @@ def obesidad(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-        )
+    )
 
     return OBESIDAD
-
 
 
 def renal_cronica(update: Update, context: CallbackContext) -> int:
@@ -476,9 +480,9 @@ def main() -> None:
         entry_points=[CommandHandler('start', start)],
         states={
             CONSENTIMIENTO: [MessageHandler(Filters.regex('^(1|2)$'), sexo)],
-            SEXO: [MessageHandler(Filters.regex('^(1|2)$'), embarazo)],
-            EMBARAZO: [MessageHandler(Filters.regex('^(1|2)$'), edad)],
-            EDAD: [MessageHandler(Filters.regex('^(1|2)$'), neumonia)],
+            SEXO: [MessageHandler(Filters.regex('^(Femenino|Masculino)$'), embarazo)],
+            EMBARAZO: [MessageHandler(Filters.regex('^(1|2)$'), edad), CommandHandler('skip', skip_embarazo)],
+            EDAD: [MessageHandler(Filters.text & ~Filters.command, neumonia)],
             NEUMONIA: [MessageHandler(Filters.regex('^(1|2)$'), indigena)],
             INDIGENA: [MessageHandler(Filters.regex('^(1|2)$'), diabetes)],
             DIABETES: [MessageHandler(Filters.regex('^(1|2)$'), epoc)],
