@@ -84,33 +84,29 @@ def predict_class(listFeatures):
 
     dtree = DecisionTreeClassifier()
     dtree = dtree.fit(X, y)
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
-    # y_hat = dtree.predict(X_test)
-    # print(classification_report(y_test, y_hat))
-    # cm = confusion_matrix(y_test, y_hat)
-    # print('Confusion matrix\n\n', cm)
-    # print('\nTrue Positives(TP) = ', cm[0, 0])
-    # print('\nTrue Negatives(TN) = ', cm[1, 1])
-    # print('\nFalse Positives(FP) = ', cm[0, 1])
-    # print('\nFalse Negatives(FN) = ', cm[1, 0])
 
-    # r = export_text(dtree, feature_names=features)
-    # print(r)
-    print(f'El resultado es: {dtree.predict([[int(listFeatures[0]), 32, int(listFeatures[2]),int(listFeatures[3]), int(listFeatures[4]), int(listFeatures[5]), int(listFeatures[6]), int(listFeatures[7]), int(listFeatures[8]), int(listFeatures[9]), int(listFeatures[10]), int(listFeatures[11]), int(listFeatures[12]), int(listFeatures[13]), int(listFeatures[14]), int(listFeatures[15])]])[0]}')
-    return 1
+    predictAnswer = dtree.predict([[listFeatures[0], listFeatures[2], listFeatures[3], listFeatures[1],
+                                    listFeatures[4], listFeatures[5], listFeatures[6],
+                                    listFeatures[7], listFeatures[8], listFeatures[10],
+                                    listFeatures[11], listFeatures[11], listFeatures[9],
+                                    listFeatures[13], listFeatures[14], listFeatures[15]]])[0]
+    return predictAnswer
 
+# RESPUESTAS 1 = SI
+# RESPUESTA  2 = No
 
 # BOT TELEGRAM
 def start(update: Update, context: CallbackContext, ) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
     dictUsers[user.username] = []
     update.message.reply_text(
-        "Hola, como puedo ayudarte? " + str(user.first_name) + " " + str(user.last_name) + " (@" + str(
+        "Hola " + str(user.first_name) + " " + str(user.last_name) + " (@" + str(
             user.username) + ")\nSoy Kronee Bot el cual te puede dar un pronostico de tener covid en base a unas preguntas," \
-                             " Quieres continuar?\n\n" \
-                             "1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                                         " para obtener mas informacion"
+                             " Quieres continuar?" \
+        + "\n\n" + "¿Necesitas ayuda?\nEscribe o pica aqui ==>'/help'" + " para obtener mas informacion" \
+        + "\n\nSi deseas cancelar la encuesta solo escribe o pica aqui ==> /cancel"\
+        + "\n\n© 2022 Ronaldo Nunez y Adan Palacios, Inc. Todos los derechos reservados."
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
@@ -121,31 +117,34 @@ def start(update: Update, context: CallbackContext, ) -> int:
 
 
 def sexo(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Femenino', 'Masculino']]
     user = update.message.chat
     logger.info("acepto la conversacion %s: %s", user.first_name, update.message.text)
-    update.message.reply_text(
-        "Me puedes decir tu sexo " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
-        ,
-        reply_markup=ReplyKeyboardMarkup(
-            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
-        ),
-    )
+    if update.message.text == "Si":
+        update.message.reply_text(
+            "Cual es tu sexo " + str(user.first_name) + " " + str(user.last_name) + \
+            "? \n\n¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
+            ,
+            reply_markup=ReplyKeyboardMarkup(
+                reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
+            ),
+        )
+    elif update.message.text == "No":
+        return ConversationHandler.END
+
     return SEXO
 
 
 def embarazo(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
     logger.info("su sexo %s: %s", user.first_name, update.message.text)
-    print(update.message.text)
     if update.message.text == 'Femenino':
         dictUsers[user.username].append(1)
         update.message.reply_text(
-            "Me puedes decir si estas embarazada " + str(user.first_name) + " " + str(user.last_name) + \
-            " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                             " para obtener mas informacion"
+            "Estas embarazada " + str(user.first_name) + " " + str(user.last_name) + \
+            "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+                     " para obtener mas informacion"
             ,
             reply_markup=ReplyKeyboardMarkup(
                 reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
@@ -155,7 +154,7 @@ def embarazo(update: Update, context: CallbackContext) -> int:
         dictUsers[user.username].append(2)
         update.message.reply_text(
             " " + str(user.first_name) + " " + str(user.last_name) + \
-            "toca aqui por favor para avanzar ==> /skip." + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
+            " toca aqui por favor para avanzar ==> /skip." + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
                                                                      " para obtener mas informacion"
             ,
         )
@@ -163,29 +162,41 @@ def embarazo(update: Update, context: CallbackContext) -> int:
     return EMBARAZO
 
 
+def skip_embarazo(update: Update, context: CallbackContext) -> int:
+    user = update.message.chat
+    dictUsers[user.username].append(2)
+    logger.info("tuvo embarazo %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(
+        "Cual es tu edad " + str(user.first_name) + " " + str(user.last_name) + \
+        "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
+    )
+
+    return EDAD
+
 
 def edad(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
     user = update.message.chat
     logger.info("tuvo embarazo %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir tu edad " + str(user.first_name) + " " + str(user.last_name) + \
-        "\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
+        "Cual es tu edad " + str(user.first_name) + " " + str(user.last_name) + \
+        "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
     )
 
     return EDAD
 
 
 def neumonia(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
     logger.info("tuvo edad %s: %s", user.first_name, update.message.text)
     dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
-        "Me puedes decir si cuentas con Neumonia " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion"
+        "Tienes Neumonia " + str(user.first_name) + " " + str(user.last_name)
+        + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion"
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
@@ -196,14 +207,16 @@ def neumonia(update: Update, context: CallbackContext) -> int:
 
 
 def indigena(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
     logger.info("tuvo neumonia %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si eres indigena " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion"
+        "Eres indigena " + str(user.first_name) + " " + str(user.last_name)
+        + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion"
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
@@ -214,14 +227,16 @@ def indigena(update: Update, context: CallbackContext) -> int:
 
 
 def diabetes(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
-    logger.info("tuvo indigena %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    logger.info("pertenece a grupo indigena %s: %s", user.first_name, update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si tienes Diabetes " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion"
+        "Tienes Diabetes " + str(user.first_name) + " " + str(user.last_name)
+        + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion"
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
@@ -232,14 +247,16 @@ def diabetes(update: Update, context: CallbackContext) -> int:
 
 
 def epoc(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
-    logger.info("tuvo diabetes %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    logger.info("tiene diabetes %s: %s", user.first_name, update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si tienes Enfermedad Pulmonar Cronica " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion"
+        "Tienes Enfermedad Pulmonar Cronica " + str(user.first_name) + " " + str(user.last_name)
+        + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion"
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
@@ -250,14 +267,17 @@ def epoc(update: Update, context: CallbackContext) -> int:
 
 
 def asma(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
     logger.info("tuvo epoc %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si tienes Asma " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion",
+        "Tienes Asma " + str(user.first_name) + " " + str(user.last_name) +
+        "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" +
+        " para obtener mas informacion",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
@@ -267,14 +287,17 @@ def asma(update: Update, context: CallbackContext) -> int:
 
 
 def inmusuper(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
     logger.info("tuvo asma %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si tienes inmune supresion " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion",
+        "Tienes inmunosupresión " + str(user.first_name) + " " + str(user.last_name) +
+        "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'"
+        + " para obtener mas informacion",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
@@ -284,14 +307,16 @@ def inmusuper(update: Update, context: CallbackContext) -> int:
 
 
 def hipertension(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
-    logger.info("tuvo inmune supresion %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    logger.info("tuvo inmunosupresión %s: %s", user.first_name, update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si tienes Hipertensionn " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion",
+        "Tienes Hipertension " + str(user.first_name) + " " + str(user.last_name)
+        + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
@@ -301,14 +326,16 @@ def hipertension(update: Update, context: CallbackContext) -> int:
 
 
 def otra_com(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
     logger.info("tuvo hipertension %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si tienes otra complicacion " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion",
+        "Tienes otra complicacion " + str(user.first_name) + " " + str(user.last_name)
+        + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
@@ -318,14 +345,16 @@ def otra_com(update: Update, context: CallbackContext) -> int:
 
 
 def cardiovascular(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
-    logger.info("tuvo otro complicacion %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    logger.info("tuvo otra complicacion %s: %s", user.first_name, update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si tienes enfermedad Cardiovascular " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion",
+        "Tienes alguna enfermedad Cardiovascular " + str(user.first_name) + " " + str(user.last_name)
+        + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
@@ -335,14 +364,16 @@ def cardiovascular(update: Update, context: CallbackContext) -> int:
 
 
 def obesidad(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
-    logger.info("tuvo cardiovascular %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    logger.info("Tiene alguna enfermedad Cardiovascular %s: %s", user.first_name, update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si tienes obesidad " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion",
+        "Tienes Obesidad " + str(user.first_name) + " " + str(user.last_name)
+        + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
@@ -352,14 +383,16 @@ def obesidad(update: Update, context: CallbackContext) -> int:
 
 
 def renal_cronica(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
-    logger.info("es obeso el hdsptm %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    logger.info("Tiene obesidad %s: %s", user.first_name, update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si tienes insuficiencia renal cronica " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion",
+        "Tienes insuficiencia renal cronica " + str(user.first_name) + " " + str(user.last_name)
+        + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
@@ -369,14 +402,16 @@ def renal_cronica(update: Update, context: CallbackContext) -> int:
 
 
 def tabaquismo(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
     logger.info("tuvo renal cronico %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Me puedes decir si fumas con frecuencia " + str(user.first_name) + " " + str(user.last_name) + \
-        " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                         " para obtener mas informacion"
+        "Fumas con frecuencia " + str(user.first_name) + " " + str(user.last_name)
+        + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion"
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
@@ -387,14 +422,16 @@ def tabaquismo(update: Update, context: CallbackContext) -> int:
 
 
 def otro_caso(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['1', '2']]
+    reply_keyboard = [['Si', 'No']]
     user = update.message.chat
     logger.info("tuvo tabaquismo %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
-    msg = "Me puedes decir si tuviste contacto con alguien diagnosticado con COVID " + str(user.first_name) + " " + str(
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
+    msg = "¿Has tenido contacto con alguien positivo a covid-19 recientemente? " + str(user.first_name) + " " + str(
         user.last_name) + \
-          " \n\n1) Si\n2) No\n\n " + "*Solo utiliza el numero*" + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                           " para obtener mas informacion"
+          "\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
     update.message.reply_text(
         msg,
         reply_markup=ReplyKeyboardMarkup(
@@ -407,12 +444,29 @@ def otro_caso(update: Update, context: CallbackContext) -> int:
 
 def final(update: Update, context: CallbackContext) -> int:
     user = update.message.chat
-    logger.info("tuvo contacto %s: %s", user.first_name, update.message.text)
-    dictUsers[user.username].append(update.message.text)
+    print(dictUsers)
+    logger.info("Ha tenido contacto con alguien positivo a covid-19 recientemente %s: %s", user.first_name, update.message.text)
+    if update.message.text == "Si":
+        dictUsers[user.username].append(1)
+    elif update.message.text == "No":
+        dictUsers[user.username].append(2)
     listFeatures = dictUsers.get(user.username)
+    msg = ""
+    if predict_class(listFeatures) == 1:
+        msg = "\nEl resultado dio positivo, esto no significa que tengas COVID-19, pero tienes altas probabilidades " \
+              "dentro de mi sistema," \
+              " te invito a que realices una cita al IMSS Digital portal web ==> (http://www.imss.gob.mx/cita-medica) ya sea " \
+              "en su pagina web o descargando la app para iOS o Android " \
+              "\n\nel link Android: https://play.google.com/store/apps/details?id=st.android.imsspublico" \
+              "\n\nel link iOS: https://itunes.apple.com/us/app/imss-digital/id975273006?mt=8\n\nesto para que un medico realice las " \
+              "pruebas pertinentes y asi te indique un tratamiento"
+    elif predict_class(listFeatures) == 2:
+        msg = "\nEl resultado dio negativo, mi sistema indica que tienes altas probabilidades de no tener COVID-19," \
+              " aunque si tienes sintomas" \
+              "te invito a sacar una cita en IMSS Digital web (http://www.imss.gob.mx/cita-medica) para que un " \
+              "medico te realice las pruebas pertinentes"
     update.message.reply_text("Gracias " + str(user.first_name) + " " + str(
-        user.last_name) + " por tu participacion, estare al pendiente para ti, tu resultado es: " + str(
-        predict_class(listFeatures)))
+        user.last_name) + " por tu participacion, estare al pendiente para ti,\n" + msg + " ")
 
     return ConversationHandler.END
 
@@ -441,20 +495,13 @@ def final(update: Update, context: CallbackContext) -> int:
 #     return LOCATION
 
 
-def bio(update: Update, context: CallbackContext) -> int:
-    user = update.message.from_user
-    logger.info("Bio of %s: %s", user.first_name, update.message.text)
-    update.message.reply_text('Thank you! I hope we can talk again some day.')
-
-    return ConversationHandler.END
-
-
 def cancel(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user
     logger.info("User %s canceled the conversation.", user.first_name)
     update.message.reply_text(
-        'Bye! I hope we can talk again some day.', reply_markup=ReplyKeyboardRemove()
+        'Adios, que tengas un buen dia .', reply_markup=ReplyKeyboardRemove()
     )
+    dictUsers.pop(user.username)
 
     return ConversationHandler.END
 
@@ -479,23 +526,23 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-            CONSENTIMIENTO: [MessageHandler(Filters.regex('^(1|2)$'), sexo)],
+            CONSENTIMIENTO: [MessageHandler(Filters.regex('^(Si|No)$'), sexo)],
             SEXO: [MessageHandler(Filters.regex('^(Femenino|Masculino)$'), embarazo)],
-            EMBARAZO: [MessageHandler(Filters.regex('^(1|2)$'), edad), CommandHandler('skip', skip_embarazo)],
+            EMBARAZO: [MessageHandler(Filters.regex('^(Si|No)$'), edad), CommandHandler('skip', skip_embarazo)],
             EDAD: [MessageHandler(Filters.text & ~Filters.command, neumonia)],
-            NEUMONIA: [MessageHandler(Filters.regex('^(1|2)$'), indigena)],
-            INDIGENA: [MessageHandler(Filters.regex('^(1|2)$'), diabetes)],
-            DIABETES: [MessageHandler(Filters.regex('^(1|2)$'), epoc)],
-            EPOC: [MessageHandler(Filters.regex('^(1|2)$'), asma)],
-            ASMA: [MessageHandler(Filters.regex('^(1|2)$'), inmusuper)],
-            INMUSUPR: [MessageHandler(Filters.regex('^(1|2)$'), obesidad)],
-            OBESIDAD: [MessageHandler(Filters.regex('^(1|2)$'), hipertension)],
-            HIPERTENSION: [MessageHandler(Filters.regex('^(1|2)$'), otra_com)],
-            OTRA_COM: [MessageHandler(Filters.regex('^(1|2)$'), cardiovascular)],
-            CARDIOVASCULAR: [MessageHandler(Filters.regex('^(1|2)$'), renal_cronica)],
-            RENAL_CRONICA: [MessageHandler(Filters.regex('^(1|2)$'), tabaquismo)],
-            TABAQUISMO: [MessageHandler(Filters.regex('^(1|2)$'), otro_caso)],
-            OTRO_CASO: [MessageHandler(Filters.regex('^(1|2)$'), final)],
+            NEUMONIA: [MessageHandler(Filters.regex('^(Si|No)$'), indigena)],
+            INDIGENA: [MessageHandler(Filters.regex('^(Si|No)$'), diabetes)],
+            DIABETES: [MessageHandler(Filters.regex('^(Si|No)$'), epoc)],
+            EPOC: [MessageHandler(Filters.regex('^(Si|No)$'), asma)],
+            ASMA: [MessageHandler(Filters.regex('^(Si|No)$'), inmusuper)],
+            INMUSUPR: [MessageHandler(Filters.regex('^(Si|No)$'), obesidad)],
+            OBESIDAD: [MessageHandler(Filters.regex('^(Si|No)$'), hipertension)],
+            HIPERTENSION: [MessageHandler(Filters.regex('^(Si|No)$'), otra_com)],
+            OTRA_COM: [MessageHandler(Filters.regex('^(Si|No)$'), cardiovascular)],
+            CARDIOVASCULAR: [MessageHandler(Filters.regex('^(Si|No)$'), renal_cronica)],
+            RENAL_CRONICA: [MessageHandler(Filters.regex('^(Si|No)$'), tabaquismo)],
+            TABAQUISMO: [MessageHandler(Filters.regex('^(Si|No)$'), otro_caso)],
+            OTRO_CASO: [MessageHandler(Filters.regex('^(Si|No)$'), final)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
