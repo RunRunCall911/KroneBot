@@ -1,7 +1,8 @@
+import multiprocessing
 import Constants as keys
-
 import logging
-
+import sched
+import time as time_module
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
@@ -13,9 +14,7 @@ from telegram.ext import (
 )
 import pymongo
 import pandas as pd
-from sklearn.metrics import confusion_matrix
-from sklearn.tree import export_text, DecisionTreeClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
 
 # Enable logging
 logging.basicConfig(
@@ -51,7 +50,10 @@ CARDIOVASCULAR, \
 OBESIDAD, \
 RENAL_CRONICA, \
 TABAQUISMO, \
-OTRO_CASO = range(17)
+OTRO_CASO,\
+PHOTO, \
+CONTINUIDAD, \
+FECHA = range(20)
 
 
 # DATA BASE
@@ -65,18 +67,22 @@ def get_database():
     try:
         client = pymongo.MongoClient(URI_CONNECTION, serverSelectionTimeoutMS=MONGODB_TIMEOUT)
         client.server_info()
-        print('OK -- Connected to MongoDB at server %s' % (MONGODB_HOST))
+        print('OK -- Connected to MongoDB at server %s' % MONGODB_HOST)
         db = client['kroneBot']
         col = db['persona']
+        return col
     except pymongo.errors.ServerSelectionTimeoutError as error:
         print('Error with MongoDB connection: %s' % error)
+        return -1
     except pymongo.errors.ConnectionFailure as error:
         print('Could not connect to MongoDB: %s' % error)
+        return -1
 
 
 # PREDICTOR
 def predict_class(listFeatures):
-    DF = pd.read_csv(r'C:\Users\User\Desktop\kronebot\kroneBot.csv')
+    #DF = pd.read_csv(r'C:\Users\User\Desktop\kronebot\kroneBot.csv')
+    DF = pd.DataFrame(list(get_database().find()))
     X = DF[features]
     y = DF['RESULTADO_LAB']
     X.astype('int64')
@@ -85,15 +91,18 @@ def predict_class(listFeatures):
     dtree = DecisionTreeClassifier()
     dtree = dtree.fit(X, y)
 
+    #NEW REGISTER
     predictAnswer = dtree.predict([[listFeatures[0], listFeatures[2], listFeatures[3], listFeatures[1],
                                     listFeatures[4], listFeatures[5], listFeatures[6],
                                     listFeatures[7], listFeatures[8], listFeatures[10],
                                     listFeatures[11], listFeatures[11], listFeatures[9],
                                     listFeatures[13], listFeatures[14], listFeatures[15]]])[0]
+
     return predictAnswer
 
 # RESPUESTAS 1 = SI
 # RESPUESTA  2 = No
+
 
 # BOT TELEGRAM
 def start(update: Update, context: CallbackContext, ) -> int:
@@ -130,6 +139,10 @@ def sexo(update: Update, context: CallbackContext) -> int:
             ),
         )
     elif update.message.text == "No":
+        update.message.reply_text(
+            "Gracias " + str(user.first_name) + " " + str(user.last_name) + \
+            " por tomarte tu tiempo, que tengas buen dia\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
+        )
         return ConversationHandler.END
 
     return SEXO
@@ -444,7 +457,6 @@ def otro_caso(update: Update, context: CallbackContext) -> int:
 
 def final(update: Update, context: CallbackContext) -> int:
     user = update.message.chat
-    print(dictUsers)
     logger.info("Ha tenido contacto con alguien positivo a covid-19 recientemente %s: %s", user.first_name, update.message.text)
     if update.message.text == "Si":
         dictUsers[user.username].append(1)
@@ -452,47 +464,87 @@ def final(update: Update, context: CallbackContext) -> int:
         dictUsers[user.username].append(2)
     listFeatures = dictUsers.get(user.username)
     msg = ""
-    if predict_class(listFeatures) == 1:
+    prediction = predict_class(listFeatures)
+    if prediction == "1":
         msg = "\nEl resultado dio positivo, esto no significa que tengas COVID-19, pero tienes altas probabilidades " \
               "dentro de mi sistema," \
               " te invito a que realices una cita al IMSS Digital portal web ==> (http://www.imss.gob.mx/cita-medica) ya sea " \
               "en su pagina web o descargando la app para iOS o Android " \
               "\n\nel link Android: https://play.google.com/store/apps/details?id=st.android.imsspublico" \
               "\n\nel link iOS: https://itunes.apple.com/us/app/imss-digital/id975273006?mt=8\n\nesto para que un medico realice las " \
-              "pruebas pertinentes y asi te indique un tratamiento"
-    elif predict_class(listFeatures) == 2:
+              "pruebas pertinentes y asi te indique un tratamiento\n\nNOTA: para dar continuidad y mejorar el sistema te invitamos a picar aqui ==> /continue" \
+              " esto ayudara bastante mi sistema para asi lograr tener mejores predicciones  "
+    elif prediction == "2":
         msg = "\nEl resultado dio negativo, mi sistema indica que tienes altas probabilidades de no tener COVID-19," \
               " aunque si tienes sintomas" \
               "te invito a sacar una cita en IMSS Digital web (http://www.imss.gob.mx/cita-medica) para que un " \
-              "medico te realice las pruebas pertinentes"
+              "medico te realice las pruebas pertinentes\n\nNOTA: para dar continuidad y mejorar el sistema te invitamos a picar aqui ==> /continue" \
+              " esto ayudara bastante mi sistema para asi lograr tener mejores predicciones "
     update.message.reply_text("Gracias " + str(user.first_name) + " " + str(
         user.last_name) + " por tu participacion, estare al pendiente para ti,\n" + msg + " ")
 
     return ConversationHandler.END
 
 
-# def photo(update: Update, context: CallbackContext) -> int:
-#     """Stores the photo and asks for a location."""
-#     user = update.message.from_user
-#     photo_file = update.message.photo[-1].get_file()
-#     photo_file.download('user_photo.jpg')
-#     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-#     update.message.reply_text(
-#         'Gorgeous! Now, send me your location please, or send /skip if you don\'t want to.'
-#     )
-#
-#     return LOCATION
-#
-#
-# def skip_photo(update: Update, context: CallbackContext) -> int:
-#     """Skips the photo and asks for a location."""
-#     user = update.message.from_user
-#     logger.info("User %s did not send a photo.", user.first_name)
-#     update.message.reply_text(
-#         'I bet you look great! Now, send me your location please, or send /skip.'
-#     )
-#
-#     return LOCATION
+def continue_covid(update: Update, context: CallbackContext, ) -> int:
+    reply_keyboard = [['Si', 'No']]
+    user = update.message.chat
+    dictUsers[user.username] = []
+    update.message.reply_text(
+        "Que tal " + str(user.first_name) + " " + str(user.last_name) + " (@" + str(
+            user.username) + ")\nGracias por querer darle continuidad al proceso, el proceso de continuidad es"
+                             " \n\n1) Fecha de tu Cita en el IMSS\n2) Resultado de IMSS en tener COVID\n"
+                             "3) Foto de posible tratamiento\n\nDeseas continuar en este proceso?" \
+        + "\n\n" + "¿Necesitas ayuda?\nEscribe o pica aqui ==>'/help'" + " para obtener mas informacion" \
+        + "\n\nSi deseas cancelar la encuesta solo escribe o pica aqui ==> /cancel" \
+        + "\n\n© 2022 Ronaldo Nunez y Adan Palacios, Inc. Todos los derechos reservados."
+        ,
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
+        ),
+        )
+
+    return CONTINUIDAD
+
+
+def fecha(update: Update, context: CallbackContext) -> int:
+    user = update.message.chat
+    logger.info("Acepto Continuidad COVID %s: %s", user.first_name, update.message.text)
+    if update.message.text == "Si":
+        update.message.reply_text(
+            "Cual es la fecha de tu cita en el IMSS  " + str(user.first_name) + " " + str(user.last_name) + \
+            "?\n\nUtilizar el formato AAAA-MM-DD\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
+        )
+    elif update.message.text == "No":
+        update.message.reply_text(
+            "Gracias " + str(user.first_name) + " " + str(user.last_name) + \
+            " por tomarte tu tiempo, que tengas buen dia\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
+        )
+        return ConversationHandler.END
+
+    return FECHA
+
+
+def photo(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user
+    photo_file = update.message.photo[-1].get_file()
+    photo_file.download('user_photo.jpg')
+    logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
+    update.message.reply_text(
+        'Gorgeous! Now, send me your location please, or send /skip if you don\'t want to.'
+    )
+
+    return PHOTO
+
+
+def skip_photo(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user
+    logger.info("User %s did not send a photo.", user.first_name)
+    update.message.reply_text(
+        'I bet you look great! Now, send me your location please, or send /skip.'
+    )
+
+    return PHOTO
 
 
 def cancel(update: Update, context: CallbackContext) -> int:
@@ -547,14 +599,46 @@ def main() -> None:
         fallbacks=[CommandHandler('cancel', cancel)],
     )
 
+    continue_handler = ConversationHandler(
+        entry_points=[CommandHandler('continue', continue_covid)],
+        states={
+            CONTINUIDAD: [MessageHandler(Filters.regex('^(Si|No)$'), fecha)],
+            FECHA: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
+            #PHOTO: [MessageHandler(Filters.text & ~Filters.command, continue_fin),
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+    )
+
     dispatcher.add_handler(CommandHandler("help", HelpCommand))
 
     dispatcher.add_handler(conv_handler)
+    dispatcher.add_handler(continue_handler)
 
     updater.start_polling()
 
     updater.idle()
 
 
+def myfunc(): print("Working")
+
+
+def start_scheduler():
+    scheduler = sched.scheduler(time_module.time, time_module.sleep)
+    t = time_module.strptime('2022-04-21 20:17:00', '%Y-%m-%d %H:%M:%S')
+    t = time_module.mktime(t)
+    scheduler_e = scheduler.enterabs(t, 1, myfunc, ())
+    scheduler.run()
+
+
 if __name__ == '__main__':
-    main()
+    process = multiprocessing.Process(target=main)
+    process2= multiprocessing.Process(target=start_scheduler)
+    process.start()
+    process2.start()
+    process.join()
+    process2.join()
+    print("done")
+
+
+
+
