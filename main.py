@@ -1,4 +1,6 @@
 import multiprocessing
+from datetime import datetime
+import datetime
 import Constants as keys
 import logging
 import sched
@@ -547,6 +549,7 @@ def skip_photo(update: Update, context: CallbackContext) -> int:
     return PHOTO
 
 
+
 def cancel(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user
     logger.info("User %s canceled the conversation.", user.first_name)
@@ -619,26 +622,21 @@ def main() -> None:
     updater.idle()
 
 
-def myfunc(): print("Working")
+def my_function():
+    print("Working")
 
 
-def start_scheduler():
+def start_scheduler(date):
     scheduler = sched.scheduler(time_module.time, time_module.sleep)
-    t = time_module.strptime('2022-04-21 20:17:00', '%Y-%m-%d %H:%M:%S')
+    date_obj = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    #date_obj = date_obj + datetime.timedelta(days=1)
+    t = time_module.strptime(date_obj.strftime('%Y-%m-%d') + ' 15:00:00', '%Y-%m-%d %H:%M:%S')
     t = time_module.mktime(t)
-    scheduler_e = scheduler.enterabs(t, 1, myfunc, ())
+    scheduler.enterabs(t, 1, my_function, ())
     scheduler.run()
 
 
 if __name__ == '__main__':
     process = multiprocessing.Process(target=main)
-    process2= multiprocessing.Process(target=start_scheduler)
     process.start()
-    process2.start()
     process.join()
-    process2.join()
-    print("done")
-
-
-
-
