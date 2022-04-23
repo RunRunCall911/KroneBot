@@ -32,6 +32,7 @@ features = ['SEXO', 'EDAD', 'NEUMONIA',
             'OBESIDAD', 'RENAL_CRONICA',
             'TABAQUISMO', 'OTRO_CASO']
 
+dictUsersContinue = {}
 dictUsers = {}
 
 logger = logging.getLogger(__name__)
@@ -52,10 +53,11 @@ CARDIOVASCULAR, \
 OBESIDAD, \
 RENAL_CRONICA, \
 TABAQUISMO, \
-OTRO_CASO,\
+OTRO_CASO, \
 PHOTO, \
 CONTINUIDAD, \
-FECHA = range(20)
+FECHA, \
+TRATAMIENTO = range(21)
 
 
 # DATA BASE
@@ -491,7 +493,7 @@ def final(update: Update, context: CallbackContext) -> int:
 def continue_covid(update: Update, context: CallbackContext, ) -> int:
     reply_keyboard = [['Si', 'No']]
     user = update.message.chat
-    dictUsers[user.username] = []
+    dictUsersContinue[user.username] = []
     update.message.reply_text(
         "Que tal " + str(user.first_name) + " " + str(user.last_name) + " (@" + str(
             user.username) + ")\nGracias por querer darle continuidad al proceso, el proceso de continuidad es"
@@ -527,13 +529,53 @@ def fecha(update: Update, context: CallbackContext) -> int:
     return FECHA
 
 
+def my_function():
+    print("Working")
+
+
+def start_scheduler(date):
+    scheduler = sched.scheduler(time_module.time, time_module.sleep)
+    date_obj = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    # date_obj = date_obj + datetime.timedelta(days=1)
+    t = time_module.strptime(date_obj.strftime('%Y-%m-%d') + ' 14:07:00', '%Y-%m-%d %H:%M:%S')
+    t = time_module.mktime(t)
+    scheduler.enterabs(t, 1, my_function, ())
+    scheduler.run()
+
+
+def tratamiento(update: Update, context: CallbackContext, ) -> int:
+    user = update.message.chat
+    fecha_cita = update.message.text
+    logger.info("Fecha de Cita IMSS %s: %s", user.first_name, fecha_cita)
+    dictUsersContinue[user.username] = []
+    process2 = multiprocessing.Process(target=start_scheduler, args=(fecha_cita,))
+    process2.start()
+    process2.join()
+    update.message.reply_text(
+        "Que tal " + str(user.first_name) + " " + str(
+            user.last_name) + " me puedes compartir una fotografia de tu tratamiento "
+                              "si no deseas compartir la fotografia pica aqui ==> /skip",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+
+    return TRATAMIENTO
+
+
 def photo(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user
     photo_file = update.message.photo[-1].get_file()
-    photo_file.download('user_photo.jpg')
-    logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
+    photo_file.download(str(user.username) + '.jpg')
+    logger.info("Tratamiento de %s: %s", user.first_name, str(user.username) + '.jpg')
+
+    reply_keyboard = [['Positivo', 'Negativo']]
+    user = update.message.chat
     update.message.reply_text(
-        'Gorgeous! Now, send me your location please, or send /skip if you don\'t want to.'
+        "Ultima pregunta  " + str(user.first_name) + " " + str(
+            user.last_name) + ")\n\nEn tu resultado fuiste positivo o negativo? "
+                              "\n\n Selecciona la respuesta abajo",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Positivo o Negativo?'
+        ),
     )
 
     return PHOTO
@@ -541,13 +583,43 @@ def photo(update: Update, context: CallbackContext) -> int:
 
 def skip_photo(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user
-    logger.info("User %s did not send a photo.", user.first_name)
+    logger.info("User %s no envio la photo.", user.first_name)
+
+    reply_keyboard = [['Positivo', 'Negativo']]
+    user = update.message.chat
     update.message.reply_text(
-        'I bet you look great! Now, send me your location please, or send /skip.'
+        "Ultima pregunta  " + str(user.first_name) + " " + str(
+            user.last_name) + ")\n\nEn tu resultado fuiste positivo o negativo? "
+                              "\n\n Selecciona la respuesta abajo",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Positivo o Negativo?'
+        ),
     )
 
     return PHOTO
 
+
+def continue_fin(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user
+    logger.info("User %s no envio la photo.", user.first_name)
+
+    if update.message.text == "Positivo":
+        update.message.reply_text(
+            "Cuidate mucho " + str(user.first_name) + " " + str(user.last_name) + \
+            "\n\nRecuerda que aun teniendo las vacunas puedes ponerte grave, resguardate y cuida a tus familiares\n"
+            "Hasta pronto, tu amigo Kronee Bot\n"
+            "Desarrollado por Ronaldo Nuñez y Adan Palacios."
+        )
+
+    elif update.message.text == "Negativo":
+        update.message.reply_text(
+            "Cuidate mucho " + str(user.first_name) + " " + str(user.last_name) + \
+            "\n\nRecuerda que aun teniendo las vacunas puedes ponerte grave, cuida a tus familiares\n"
+            "Hasta pronto, tu amigo Kronee Bot\n"
+            "Desarrollado por Ronaldo Nuñez y Adan Palacios."
+        )
+
+    return ConversationHandler.END
 
 
 def cancel(update: Update, context: CallbackContext) -> int:
@@ -606,8 +678,9 @@ def main() -> None:
         entry_points=[CommandHandler('continue', continue_covid)],
         states={
             CONTINUIDAD: [MessageHandler(Filters.regex('^(Si|No)$'), fecha)],
-            FECHA: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
-            #PHOTO: [MessageHandler(Filters.text & ~Filters.command, continue_fin),
+            FECHA: [MessageHandler(Filters.text & ~Filters.command, tratamiento)],
+            TRATAMIENTO: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
+            PHOTO: [MessageHandler(Filters.regex('^(Positivo|Negativo)$'), continue_fin)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
@@ -620,20 +693,6 @@ def main() -> None:
     updater.start_polling()
 
     updater.idle()
-
-
-def my_function():
-    print("Working")
-
-
-def start_scheduler(date):
-    scheduler = sched.scheduler(time_module.time, time_module.sleep)
-    date_obj = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-    #date_obj = date_obj + datetime.timedelta(days=1)
-    t = time_module.strptime(date_obj.strftime('%Y-%m-%d') + ' 15:00:00', '%Y-%m-%d %H:%M:%S')
-    t = time_module.mktime(t)
-    scheduler.enterabs(t, 1, my_function, ())
-    scheduler.run()
 
 
 if __name__ == '__main__':
