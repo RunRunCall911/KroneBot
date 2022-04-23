@@ -1,6 +1,4 @@
 import multiprocessing
-from datetime import datetime
-import datetime
 import Constants as keys
 import logging
 import sched
@@ -58,6 +56,9 @@ PHOTO, \
 CONTINUIDAD, \
 FECHA, \
 TRATAMIENTO = range(21)
+
+
+
 
 
 # DATA BASE
@@ -535,9 +536,9 @@ def my_function():
 
 def start_scheduler(date):
     scheduler = sched.scheduler(time_module.time, time_module.sleep)
-    date_obj = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    #date_obj = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
     # date_obj = date_obj + datetime.timedelta(days=1)
-    t = time_module.strptime(date_obj.strftime('%Y-%m-%d') + ' 14:07:00', '%Y-%m-%d %H:%M:%S')
+    t = time_module.strptime(date + ' 16:30:00', '%Y-%m-%d %H:%M:%S')
     t = time_module.mktime(t)
     scheduler.enterabs(t, 1, my_function, ())
     scheduler.run()
@@ -559,6 +560,7 @@ def tratamiento(update: Update, context: CallbackContext, ) -> int:
     )
 
     return TRATAMIENTO
+
 
 
 def photo(update: Update, context: CallbackContext) -> int:
@@ -643,7 +645,7 @@ def HelpCommand(Update, Context):
                               '3. http://www.imss.gob.mx/covid-19/rehabilitacion')
 
 
-def main() -> None:
+def mainFunc() -> None:
     updater = Updater(keys.API_KEY, use_context=True)
 
     # Get the dispatcher to register handlers
@@ -695,7 +697,8 @@ def main() -> None:
     updater.idle()
 
 
+process = multiprocessing.Process(target=mainFunc)
+
 if __name__ == '__main__':
-    process = multiprocessing.Process(target=main)
     process.start()
     process.join()
