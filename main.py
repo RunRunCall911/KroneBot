@@ -1,4 +1,3 @@
-import multiprocessing
 import Constants as keys
 import logging
 import sched
@@ -56,9 +55,6 @@ PHOTO, \
 CONTINUIDAD, \
 FECHA, \
 TRATAMIENTO = range(21)
-
-
-
 
 
 # DATA BASE
@@ -531,14 +527,14 @@ def fecha(update: Update, context: CallbackContext) -> int:
 
 
 def my_function():
-    print("Working")
+    print("Dia alcanzado")
 
 
 def start_scheduler(date):
     scheduler = sched.scheduler(time_module.time, time_module.sleep)
     #date_obj = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
     # date_obj = date_obj + datetime.timedelta(days=1)
-    t = time_module.strptime(date + ' 16:30:00', '%Y-%m-%d %H:%M:%S')
+    t = time_module.strptime(date + ' 19:36:00', '%Y-%m-%d %H:%M:%S')
     t = time_module.mktime(t)
     scheduler.enterabs(t, 1, my_function, ())
     scheduler.run()
@@ -548,10 +544,7 @@ def tratamiento(update: Update, context: CallbackContext, ) -> int:
     user = update.message.chat
     fecha_cita = update.message.text
     logger.info("Fecha de Cita IMSS %s: %s", user.first_name, fecha_cita)
-    dictUsersContinue[user.username] = []
-    process2 = multiprocessing.Process(target=start_scheduler, args=(fecha_cita,))
-    process2.start()
-    process2.join()
+    start_scheduler(fecha_cita)
     update.message.reply_text(
         "Que tal " + str(user.first_name) + " " + str(
             user.last_name) + " me puedes compartir una fotografia de tu tratamiento "
@@ -560,7 +553,6 @@ def tratamiento(update: Update, context: CallbackContext, ) -> int:
     )
 
     return TRATAMIENTO
-
 
 
 def photo(update: Update, context: CallbackContext) -> int:
@@ -655,23 +647,23 @@ def mainFunc() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-            CONSENTIMIENTO: [MessageHandler(Filters.regex('^(Si|No)$'), sexo)],
-            SEXO: [MessageHandler(Filters.regex('^(Femenino|Masculino)$'), embarazo)],
-            EMBARAZO: [MessageHandler(Filters.regex('^(Si|No)$'), edad), CommandHandler('skip', skip_embarazo)],
-            EDAD: [MessageHandler(Filters.text & ~Filters.command, neumonia)],
-            NEUMONIA: [MessageHandler(Filters.regex('^(Si|No)$'), indigena)],
-            INDIGENA: [MessageHandler(Filters.regex('^(Si|No)$'), diabetes)],
-            DIABETES: [MessageHandler(Filters.regex('^(Si|No)$'), epoc)],
-            EPOC: [MessageHandler(Filters.regex('^(Si|No)$'), asma)],
-            ASMA: [MessageHandler(Filters.regex('^(Si|No)$'), inmusuper)],
-            INMUSUPR: [MessageHandler(Filters.regex('^(Si|No)$'), obesidad)],
-            OBESIDAD: [MessageHandler(Filters.regex('^(Si|No)$'), hipertension)],
-            HIPERTENSION: [MessageHandler(Filters.regex('^(Si|No)$'), otra_com)],
-            OTRA_COM: [MessageHandler(Filters.regex('^(Si|No)$'), cardiovascular)],
-            CARDIOVASCULAR: [MessageHandler(Filters.regex('^(Si|No)$'), renal_cronica)],
-            RENAL_CRONICA: [MessageHandler(Filters.regex('^(Si|No)$'), tabaquismo)],
-            TABAQUISMO: [MessageHandler(Filters.regex('^(Si|No)$'), otro_caso)],
-            OTRO_CASO: [MessageHandler(Filters.regex('^(Si|No)$'), final)],
+            CONSENTIMIENTO: [MessageHandler(Filters.regex('^(Si|No)$'), sexo, run_async=True)],
+            SEXO: [MessageHandler(Filters.regex('^(Femenino|Masculino)$'), embarazo, run_async=True)],
+            EMBARAZO: [MessageHandler(Filters.regex('^(Si|No)$'), edad, run_async=True), CommandHandler('skip', skip_embarazo)],
+            EDAD: [MessageHandler(Filters.text & ~Filters.command, neumonia, run_async=True)],
+            NEUMONIA: [MessageHandler(Filters.regex('^(Si|No)$'), indigena, run_async=True)],
+            INDIGENA: [MessageHandler(Filters.regex('^(Si|No)$'), diabetes, run_async=True)],
+            DIABETES: [MessageHandler(Filters.regex('^(Si|No)$'), epoc, run_async=True)],
+            EPOC: [MessageHandler(Filters.regex('^(Si|No)$'), asma, run_async=True)],
+            ASMA: [MessageHandler(Filters.regex('^(Si|No)$'), inmusuper, run_async=True)],
+            INMUSUPR: [MessageHandler(Filters.regex('^(Si|No)$'), obesidad, run_async=True)],
+            OBESIDAD: [MessageHandler(Filters.regex('^(Si|No)$'), hipertension, run_async=True)],
+            HIPERTENSION: [MessageHandler(Filters.regex('^(Si|No)$'), otra_com, run_async=True)],
+            OTRA_COM: [MessageHandler(Filters.regex('^(Si|No)$'), cardiovascular, run_async=True)],
+            CARDIOVASCULAR: [MessageHandler(Filters.regex('^(Si|No)$'), renal_cronica, run_async=True)],
+            RENAL_CRONICA: [MessageHandler(Filters.regex('^(Si|No)$'), tabaquismo, run_async=True)],
+            TABAQUISMO: [MessageHandler(Filters.regex('^(Si|No)$'), otro_caso, run_async=True)],
+            OTRO_CASO: [MessageHandler(Filters.regex('^(Si|No)$'), final, run_async=True)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
@@ -679,10 +671,10 @@ def mainFunc() -> None:
     continue_handler = ConversationHandler(
         entry_points=[CommandHandler('continue', continue_covid)],
         states={
-            CONTINUIDAD: [MessageHandler(Filters.regex('^(Si|No)$'), fecha)],
-            FECHA: [MessageHandler(Filters.text & ~Filters.command, tratamiento)],
-            TRATAMIENTO: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
-            PHOTO: [MessageHandler(Filters.regex('^(Positivo|Negativo)$'), continue_fin)],
+            CONTINUIDAD: [MessageHandler(Filters.regex('^(Si|No)$'), fecha, run_async=True)],
+            FECHA: [MessageHandler(Filters.text & ~Filters.command, tratamiento, run_async=True)],
+            TRATAMIENTO: [MessageHandler(Filters.photo, photo, run_async=True), CommandHandler('skip', skip_photo)],
+            PHOTO: [MessageHandler(Filters.regex('^(Positivo|Negativo)$'), continue_fin, run_async=True)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
@@ -697,8 +689,5 @@ def mainFunc() -> None:
     updater.idle()
 
 
-process = multiprocessing.Process(target=mainFunc)
-
 if __name__ == '__main__':
-    process.start()
-    process.join()
+    mainFunc()
