@@ -1,3 +1,5 @@
+from datetime import datetime
+import datetime as fecha_date
 import Constants as keys
 import logging
 import sched
@@ -16,7 +18,7 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 
 # Enable logging
-logging.basicConfig(
+logging.basicConfig (
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 
@@ -70,8 +72,7 @@ def get_database():
         client.server_info()
         print('OK -- Connected to MongoDB at server %s' % MONGODB_HOST)
         db = client['kroneBot']
-        col = db['persona']
-        return col
+        return db
     except pymongo.errors.ServerSelectionTimeoutError as error:
         print('Error with MongoDB connection: %s' % error)
         return -1
@@ -83,7 +84,7 @@ def get_database():
 # PREDICTOR
 def predict_class(listFeatures):
     #DF = pd.read_csv(r'C:\Users\User\Desktop\kronebot\kroneBot.csv')
-    DF = pd.DataFrame(list(get_database().find()))
+    DF = pd.DataFrame(list(get_database()['persona'].find()))
     X = DF[features]
     y = DF['RESULTADO_LAB']
     X.astype('int64')
@@ -96,7 +97,7 @@ def predict_class(listFeatures):
     predictAnswer = dtree.predict([[listFeatures[0], listFeatures[2], listFeatures[3], listFeatures[1],
                                     listFeatures[4], listFeatures[5], listFeatures[6],
                                     listFeatures[7], listFeatures[8], listFeatures[10],
-                                    listFeatures[11], listFeatures[11], listFeatures[9],
+                                    listFeatures[11], listFeatures[12], listFeatures[9],
                                     listFeatures[13], listFeatures[14], listFeatures[15]]])[0]
 
     return predictAnswer
@@ -527,16 +528,31 @@ def fecha(update: Update, context: CallbackContext) -> int:
 
 
 def my_function():
-    print("Dia alcanzado")
+    print("Mañana tienes cita")
 
 
-def start_scheduler(date):
+def my_function2():
+    print("Favor de enviar foto")
+
+
+def start_scheduler_day_before(date):
     scheduler = sched.scheduler(time_module.time, time_module.sleep)
-    #date_obj = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-    # date_obj = date_obj + datetime.timedelta(days=1)
-    t = time_module.strptime(date + ' 19:36:00', '%Y-%m-%d %H:%M:%S')
+    date_obj = datetime.strptime(date + ' 13:00:00', '%Y-%m-%d %H:%M:%S')
+    date_obj = date_obj - fecha_date.timedelta(days=1)
+    print(str(date_obj))
+    t = time_module.strptime(str(date_obj), '%Y-%m-%d %H:%M:%S')
     t = time_module.mktime(t)
     scheduler.enterabs(t, 1, my_function, ())
+    scheduler.run()
+
+
+def start_scheduler_day_after(date):
+    scheduler = sched.scheduler(time_module.time, time_module.sleep)
+    date_obj = datetime.strptime(date + ' 13:00:00', '%Y-%m-%d %H:%M:%S')
+    date_obj = date_obj + fecha_date.timedelta(days=1)
+    t = time_module.strptime(str(date_obj), '%Y-%m-%d %H:%M:%S')
+    t = time_module.mktime(t)
+    scheduler.enterabs(t, 1, my_function2, ())
     scheduler.run()
 
 
@@ -544,7 +560,19 @@ def tratamiento(update: Update, context: CallbackContext, ) -> int:
     user = update.message.chat
     fecha_cita = update.message.text
     logger.info("Fecha de Cita IMSS %s: %s", user.first_name, fecha_cita)
-    start_scheduler(fecha_cita)
+    dictUsersContinue[user.username].append(fecha_cita)
+    update.message.reply_text(
+        "Gracias " + str(user.first_name) + " " + str(
+            user.last_name) + " te enviare un recordatorio un dia antes de tu cita.",
+        reply_markup=ReplyKeyboardRemove(),
+        )
+    start_scheduler_day_before(fecha_cita)
+    update.message.reply_text(
+        "Que tal " + str(user.first_name) + " " + str(
+            user.last_name) + " recuerda que el dia de mañana tienes tu cita medica.",
+        reply_markup=ReplyKeyboardRemove(),
+        )
+    start_scheduler_day_after(fecha_cita)
     update.message.reply_text(
         "Que tal " + str(user.first_name) + " " + str(
             user.last_name) + " me puedes compartir una fotografia de tu tratamiento "
@@ -614,6 +642,7 @@ def continue_fin(update: Update, context: CallbackContext) -> int:
         )
 
     return ConversationHandler.END
+
 
 
 def cancel(update: Update, context: CallbackContext) -> int:
