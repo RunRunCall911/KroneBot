@@ -116,13 +116,13 @@ def start(update: Update, context: CallbackContext, ) -> int:
             user.username) + ")\nSoy Kronee Bot el cual te puede dar un pronostico de tener covid en base a unas preguntas," \
                              " Quieres continuar?" \
         + "\n\n" + "¿Necesitas ayuda?\nEscribe o pica aqui ==>'/help'" + " para obtener mas informacion" \
-        + "\n\nSi deseas cancelar la encuesta solo escribe o pica aqui ==> /cancel"\
+        + "\n\nSi deseas cancelar la encuesta solo escribe o pica aqui ==> /cancel" \
         + "\n\n© 2022 Ronaldo Nunez y Adan Palacios, Inc. Todos los derechos reservados."
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
         ),
-    )
+        )
 
     return CONSENTIMIENTO
 
@@ -139,7 +139,7 @@ def sexo(update: Update, context: CallbackContext) -> int:
             reply_markup=ReplyKeyboardMarkup(
                 reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
             ),
-        )
+            )
     elif update.message.text == "No":
         update.message.reply_text(
             "Gracias " + str(user.first_name) + " " + str(user.last_name) + \
@@ -159,20 +159,20 @@ def embarazo(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(
             "Estas embarazada " + str(user.first_name) + " " + str(user.last_name) + \
             "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                     " para obtener mas informacion"
+                      " para obtener mas informacion"
             ,
             reply_markup=ReplyKeyboardMarkup(
                 reply_keyboard, one_time_keyboard=True, input_field_placeholder='Si o No?'
             ),
-        )
+            )
     elif update.message.text == 'Masculino':
         dictUsers[user.username].append(2)
         update.message.reply_text(
             " " + str(user.first_name) + " " + str(user.last_name) + \
             " toca aqui por favor para avanzar ==> /skip." + "\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" \
-                                                                     " para obtener mas informacion"
+                                                                      " para obtener mas informacion"
             ,
-        )
+            )
 
     return EMBARAZO
 
@@ -200,14 +200,13 @@ def edad(update: Update, context: CallbackContext) -> int:
         "Cual es tu edad " + str(user.first_name) + " " + str(user.last_name) + \
         "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
     )
-
     return EDAD
 
 
 def neumonia(update: Update, context: CallbackContext) -> int:
     reply_keyboard = [['Si', 'No']]
     user = update.message.chat
-    logger.info("tuvo edad %s: %s", user.first_name, update.message.text)
+    logger.info("tiene edad %s: %s", user.first_name, update.message.text)
     dictUsers[user.username].append(update.message.text)
     update.message.reply_text(
         "Tienes Neumonia " + str(user.first_name) + " " + str(user.last_name)
@@ -216,7 +215,7 @@ def neumonia(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return NEUMONIA
 
@@ -236,7 +235,7 @@ def indigena(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return INDIGENA
 
@@ -256,7 +255,7 @@ def diabetes(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return DIABETES
 
@@ -276,7 +275,7 @@ def epoc(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return EPOC
 
@@ -296,7 +295,7 @@ def asma(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return ASMA
 
@@ -316,7 +315,7 @@ def inmusuper(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return INMUSUPR
 
@@ -335,7 +334,7 @@ def hipertension(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return HIPERTENSION
 
@@ -354,7 +353,7 @@ def otra_com(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return OTRA_COM
 
@@ -373,7 +372,7 @@ def cardiovascular(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return CARDIOVASCULAR
 
@@ -392,7 +391,7 @@ def obesidad(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return OBESIDAD
 
@@ -411,7 +410,7 @@ def renal_cronica(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return RENAL_CRONICA
 
@@ -425,13 +424,13 @@ def tabaquismo(update: Update, context: CallbackContext) -> int:
     elif update.message.text == "No":
         dictUsers[user.username].append(2)
     update.message.reply_text(
-        "Fumas con frecuencia " + str(user.first_name) + " " + str(user.last_name)
+        "Fumas con frecuencia tabaco " + str(user.first_name) + " " + str(user.last_name)
         + "?\n\n" + "¿Necesitas ayuda?\nEscribe '/help'" + " para obtener mas informacion"
         ,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True
         ),
-    )
+        )
 
     return TABAQUISMO
 
@@ -462,11 +461,14 @@ def final(update: Update, context: CallbackContext) -> int:
     logger.info("Ha tenido contacto con alguien positivo a covid-19 recientemente %s: %s", user.first_name, update.message.text)
     if update.message.text == "Si":
         dictUsers[user.username].append(1)
+        dictUsers[user.username].append(user.username)
     elif update.message.text == "No":
         dictUsers[user.username].append(2)
+        dictUsers[user.username].append(user.username)
     listFeatures = dictUsers.get(user.username)
+    addUserDB(listFeatures)
     msg = ""
-    prediction = predict_class(listFeatures)
+    prediction = str(predict_class(listFeatures))
     if prediction == "1":
         msg = "\nEl resultado dio positivo, esto no significa que tengas COVID-19, pero tienes altas probabilidades " \
               "dentro de mi sistema," \
@@ -513,11 +515,15 @@ def fecha(update: Update, context: CallbackContext) -> int:
     user = update.message.chat
     logger.info("Acepto Continuidad COVID %s: %s", user.first_name, update.message.text)
     if update.message.text == "Si":
+        dictUsersContinue[user.username].append(user.username)
+        dictUsersContinue[user.username].append(1)
         update.message.reply_text(
             "Cual es la fecha de tu cita en el IMSS  " + str(user.first_name) + " " + str(user.last_name) + \
             "?\n\nUtilizar el formato AAAA-MM-DD\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
         )
     elif update.message.text == "No":
+        dictUsersContinue[user.username].append(user.username)
+        dictUsersContinue[user.username].append(2)
         update.message.reply_text(
             "Gracias " + str(user.first_name) + " " + str(user.last_name) + \
             " por tomarte tu tiempo, que tengas buen dia\n\n" + "¿Necesitas ayuda?\nEscribe '/help' para obtener mas informacion"
@@ -578,7 +584,7 @@ def tratamiento(update: Update, context: CallbackContext, ) -> int:
             user.last_name) + " me puedes compartir una fotografia de tu tratamiento "
                               "si no deseas compartir la fotografia pica aqui ==> /skip",
         reply_markup=ReplyKeyboardRemove(),
-    )
+        )
 
     return TRATAMIENTO
 
@@ -586,7 +592,8 @@ def tratamiento(update: Update, context: CallbackContext, ) -> int:
 def photo(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user
     photo_file = update.message.photo[-1].get_file()
-    photo_file.download(str(user.username) + '.jpg')
+    photo_file.download('./tratamientos/'+str(user.username) + '.jpg')
+    dictUsersContinue[user.username].append(str(user.username) + '.jpg')
     logger.info("Tratamiento de %s: %s", user.first_name, str(user.username) + '.jpg')
 
     reply_keyboard = [['Positivo', 'Negativo']]
@@ -598,7 +605,7 @@ def photo(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True, input_field_placeholder='Positivo o Negativo?'
         ),
-    )
+        )
 
     return PHOTO
 
@@ -611,12 +618,12 @@ def skip_photo(update: Update, context: CallbackContext) -> int:
     user = update.message.chat
     update.message.reply_text(
         "Ultima pregunta  " + str(user.first_name) + " " + str(
-            user.last_name) + ")\n\nEn tu resultado fuiste positivo o negativo? "
+            user.last_name) + "\n\nEn tu resultado fuiste positivo o negativo? "
                               "\n\n Selecciona la respuesta abajo",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True, input_field_placeholder='Positivo o Negativo?'
         ),
-    )
+        )
 
     return PHOTO
 
@@ -626,32 +633,88 @@ def continue_fin(update: Update, context: CallbackContext) -> int:
     logger.info("User %s no envio la photo.", user.first_name)
 
     if update.message.text == "Positivo":
+        dictUsersContinue[user.username].append(1)
+        list = dictUsersContinue.get(user.username)
+        addUserContinueDB(list)
         update.message.reply_text(
             "Cuidate mucho " + str(user.first_name) + " " + str(user.last_name) + \
             "\n\nRecuerda que aun teniendo las vacunas puedes ponerte grave, resguardate y cuida a tus familiares\n"
-            "Hasta pronto, tu amigo Kronee Bot\n"
-            "Desarrollado por Ronaldo Nuñez y Adan Palacios."
+            "Hasta pronto, tu amigo Kronee Bot\n\n"
+            "Desarrollado por Ronaldo Nuñez y Adan Palacios todos los derechos reservados."
         )
 
     elif update.message.text == "Negativo":
+        dictUsersContinue[user.username].append(2)
+        list = dictUsersContinue.get(user.username)
+        addUserContinueDB(list)
         update.message.reply_text(
             "Cuidate mucho " + str(user.first_name) + " " + str(user.last_name) + \
             "\n\nRecuerda que aun teniendo las vacunas puedes ponerte grave, cuida a tus familiares\n"
-            "Hasta pronto, tu amigo Kronee Bot\n"
-            "Desarrollado por Ronaldo Nuñez y Adan Palacios."
+            "Hasta pronto, tu amigo Kronee Bot\n\n"
+            "Desarrollado por Ronaldo Nuñez y Adan Palacios todos los derechos reservados."
         )
 
     return ConversationHandler.END
 
+
+def addUserDB(ListUser):
+    user = {
+        "USUARIO"       :ListUser[16],
+        "SEXO"          :ListUser[0],
+        "EDAD"          :ListUser[2],
+        "NEUMONIA"      :ListUser[3],
+        "EMBARAZO"      :ListUser[1],
+        "INDIGENA"      :ListUser[4],
+        "DIABETES"      :ListUser[5],
+        "EPOC"          :ListUser[6],
+        "ASMA"          :ListUser[7],
+        "INMUSUPR"      :ListUser[8],
+        "HIPERTENSION"  :ListUser[10],
+        "OTRA_COM"      :ListUser[11],
+        "CARDIOVASCULAR":ListUser[12],
+        "OBESIDAD"      :ListUser[9],
+        "RENAL_CRONICA" :ListUser[13],
+        "TABAQUISMO"    :ListUser[14],
+        "OTRO_CASO"     :ListUser[15]
+    }
+
+    # Insert Data
+    collection = get_database()['nuevo_registro']
+    collection.insert_one(user)
+
+
+def addUserContinueDB(ListUser):
+    if len(ListUser) < 5:
+        user = {
+            "USUARIO"           :ListUser[0],
+            "CONSENTIMIENTO"    :ListUser[1],
+            "FECHA_CITA"        :ListUser[2],
+            "PHOTO_NOMBRE"      :"SIN_PHOTO",
+            "RESULTADO_LAB"     :ListUser[3]
+        }
+        collection = get_database()['continuidad']
+        collection.insert_one(user)
+    elif len(ListUser) > 4:
+        user = {
+            "USUARIO"           :ListUser[0],
+            "CONSENTIMIENTO"    :ListUser[1],
+            "FECHA_CITA"        :ListUser[2],
+            "PHOTO_NOMBRE"      :ListUser[3],
+            "RESULTADO_LAB"     :ListUser[4]
+        }
+        collection = get_database()['continuidad']
+        collection.insert_one(user)
 
 
 def cancel(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user
     logger.info("User %s canceled the conversation.", user.first_name)
     update.message.reply_text(
-        'Adios, que tengas un buen dia .', reply_markup=ReplyKeyboardRemove()
+        'Adios, que tengas un buen dia .'
+        '\n\n© 2022 Ronaldo Nunez y Adan Palacios, Inc. Todos los derechos reservados.', reply_markup=ReplyKeyboardRemove()
     )
-    dictUsers.pop(user.username)
+    if user.username in dictUsers.keys():
+        dictUsers.pop(user.username)
 
     return ConversationHandler.END
 
@@ -676,23 +739,23 @@ def mainFunc() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-            CONSENTIMIENTO: [MessageHandler(Filters.regex('^(Si|No)$'), sexo, run_async=True)],
-            SEXO: [MessageHandler(Filters.regex('^(Femenino|Masculino)$'), embarazo, run_async=True)],
-            EMBARAZO: [MessageHandler(Filters.regex('^(Si|No)$'), edad, run_async=True), CommandHandler('skip', skip_embarazo)],
-            EDAD: [MessageHandler(Filters.text & ~Filters.command, neumonia, run_async=True)],
-            NEUMONIA: [MessageHandler(Filters.regex('^(Si|No)$'), indigena, run_async=True)],
-            INDIGENA: [MessageHandler(Filters.regex('^(Si|No)$'), diabetes, run_async=True)],
-            DIABETES: [MessageHandler(Filters.regex('^(Si|No)$'), epoc, run_async=True)],
-            EPOC: [MessageHandler(Filters.regex('^(Si|No)$'), asma, run_async=True)],
-            ASMA: [MessageHandler(Filters.regex('^(Si|No)$'), inmusuper, run_async=True)],
-            INMUSUPR: [MessageHandler(Filters.regex('^(Si|No)$'), obesidad, run_async=True)],
-            OBESIDAD: [MessageHandler(Filters.regex('^(Si|No)$'), hipertension, run_async=True)],
-            HIPERTENSION: [MessageHandler(Filters.regex('^(Si|No)$'), otra_com, run_async=True)],
-            OTRA_COM: [MessageHandler(Filters.regex('^(Si|No)$'), cardiovascular, run_async=True)],
-            CARDIOVASCULAR: [MessageHandler(Filters.regex('^(Si|No)$'), renal_cronica, run_async=True)],
-            RENAL_CRONICA: [MessageHandler(Filters.regex('^(Si|No)$'), tabaquismo, run_async=True)],
-            TABAQUISMO: [MessageHandler(Filters.regex('^(Si|No)$'), otro_caso, run_async=True)],
-            OTRO_CASO: [MessageHandler(Filters.regex('^(Si|No)$'), final, run_async=True)],
+            CONSENTIMIENTO  : [MessageHandler(Filters.regex('^(Si|No)$'), sexo, run_async=True)],
+            SEXO            : [MessageHandler(Filters.regex('^(Femenino|Masculino)$'), embarazo, run_async=True)],
+            EMBARAZO        : [MessageHandler(Filters.regex('^(Si|No)$'), edad, run_async=True), CommandHandler('skip', skip_embarazo)],
+            EDAD            : [MessageHandler(Filters.text & ~Filters.command, neumonia, run_async=True)],
+            NEUMONIA        : [MessageHandler(Filters.regex('^(Si|No)$'), indigena, run_async=True)],
+            INDIGENA        : [MessageHandler(Filters.regex('^(Si|No)$'), diabetes, run_async=True)],
+            DIABETES        : [MessageHandler(Filters.regex('^(Si|No)$'), epoc, run_async=True)],
+            EPOC            : [MessageHandler(Filters.regex('^(Si|No)$'), asma, run_async=True)],
+            ASMA            : [MessageHandler(Filters.regex('^(Si|No)$'), inmusuper, run_async=True)],
+            INMUSUPR        : [MessageHandler(Filters.regex('^(Si|No)$'), obesidad, run_async=True)],
+            OBESIDAD        : [MessageHandler(Filters.regex('^(Si|No)$'), hipertension, run_async=True)],
+            HIPERTENSION    : [MessageHandler(Filters.regex('^(Si|No)$'), otra_com, run_async=True)],
+            OTRA_COM        : [MessageHandler(Filters.regex('^(Si|No)$'), cardiovascular, run_async=True)],
+            CARDIOVASCULAR  : [MessageHandler(Filters.regex('^(Si|No)$'), renal_cronica, run_async=True)],
+            RENAL_CRONICA   : [MessageHandler(Filters.regex('^(Si|No)$'), tabaquismo, run_async=True)],
+            TABAQUISMO      : [MessageHandler(Filters.regex('^(Si|No)$'), otro_caso, run_async=True)],
+            OTRO_CASO       : [MessageHandler(Filters.regex('^(Si|No)$'), final, run_async=True)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
@@ -700,10 +763,10 @@ def mainFunc() -> None:
     continue_handler = ConversationHandler(
         entry_points=[CommandHandler('continue', continue_covid)],
         states={
-            CONTINUIDAD: [MessageHandler(Filters.regex('^(Si|No)$'), fecha, run_async=True)],
-            FECHA: [MessageHandler(Filters.text & ~Filters.command, tratamiento, run_async=True)],
-            TRATAMIENTO: [MessageHandler(Filters.photo, photo, run_async=True), CommandHandler('skip', skip_photo)],
-            PHOTO: [MessageHandler(Filters.regex('^(Positivo|Negativo)$'), continue_fin, run_async=True)],
+            CONTINUIDAD     : [MessageHandler(Filters.regex('^(Si|No)$'), fecha, run_async=True)],
+            FECHA           : [MessageHandler(Filters.text & ~Filters.command, tratamiento, run_async=True)],
+            TRATAMIENTO     : [MessageHandler(Filters.photo, photo, run_async=True), CommandHandler('skip', skip_photo)],
+            PHOTO           : [MessageHandler(Filters.regex('^(Positivo|Negativo)$'), continue_fin, run_async=True)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
