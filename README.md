@@ -296,10 +296,11 @@ dentro del chat. Esta versión se trata de la aplicación de escritorio de teleg
 el mismo buscador de la aplicación para buscar el bot (@kroneebot).
 
 <p align="center">
-    <img width="900" src="./images/kroneD1.png">
+    <img width="900" src="images/kroneD1.png">
 </p>
+
 <p align="center">
-    <img width="400" src="./images/kroneD2.png">
+    <img width="400" src="images/kroneD2.png">
 </p>
 
 ##Creado por
