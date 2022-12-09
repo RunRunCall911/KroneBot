@@ -276,9 +276,7 @@ Lista de las diferentes pruebas que se realizan para cada uno de los  conjuntos 
 
 #Diseño de arquitectura
 
-<p align="center">
-    <img width="800" src="./images/image.png">
-</p>
+![K](images/image.png)
 
 
 ## Desarrollado
@@ -295,10 +293,9 @@ implementaron algunos elementos visuales, como seleccionar entre opciones con �
 dentro del chat. Esta versión se trata de la aplicación de escritorio de telegram. Se utiliza
 el mismo buscador de la aplicación para buscar el bot (@kroneebot).
 
-<p align="center">
-  <img src="images/kroneD1.png">
-  <img src="images/kroneD2.png">
-</p>
+![K](images/kroneD1.png)
+![K](images/kroneD2.png)
+
 
 ##Creado por
   * Ronaldo Nuñez Gonzalez  (@RunRunCall911)
