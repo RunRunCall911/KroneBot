@@ -34,9 +34,11 @@ de un celular moderno, solo se requiere apk Telegram instalada.
 #### Requisistos
 
 ```
+
 * Celular
 * Telegram instalada
 * Cuenta de telegram
+
 ```
 
 ## Entendimiento de los datos
@@ -44,6 +46,7 @@ de un celular moderno, solo se requiere apk Telegram instalada.
 Recoleccion de los datos iniciales y utilizados en nuestro proyecto
 
 ```
+
 * FECHA_ACTUALIZACION,
 * ID_REGISTRO
 * ORIGEN
@@ -107,6 +110,8 @@ Todos nuestros datos fueron obtenidos de distintos expedientes clínicos que el 
 pacientes. cabe señalar que se consiguió en la  página: https://www.gob.mx/salud/documentos/datos-abiertos-152127
 
 ``` 
+
+
 FECHA_ACTUALIZACION     (Categórico)
 La base de datos se alimenta diariamente, esta variable permite identificar la fecha de la última actualización.
 
@@ -234,6 +239,8 @@ Identifica el país del que partió el paciente rumbo a México.
 
 UCI                     (Categórico)
 Identifica si el paciente requirió ingresar a una Unidad de Cuidados Intensivos.
+
+
 ```
 
 ##Selección de los Datos 
@@ -250,6 +257,8 @@ Eliminación de atributos con poca variabilidad
 
 
 ```
+
+
 * FECHA_ACTUALIZACION,
 * ORIGEN
 * SECTOR
@@ -266,6 +275,8 @@ Eliminación de atributos con poca variabilidad
 * CLASIFICACION_FINAL
 * PAIS_NACIONALIDAD
 * PAIS_ORIGEN
+
+
 ```
 
 
@@ -278,22 +289,22 @@ Eliminación de atributos con poca variabilidad
 Lista de las técnicas que se utilizarán para la evaluación del modelo  
 Dado que nuestro problema es de clasificación usaremos los  siguientes algoritmos:
 
-
+```
     ● El problema que deseamos resolver con el conjunto de datos que  estamos tratando es de tipo clasificación.
       para obtener la solución  esperada utilizaremos el algoritmo Naive Bayes  
     ● También utilizaremos el algoritmo Tree árbol de decisión.
-
+```
 
 ##Generación de Plan de Prueba 
 
 
 Lista de las diferentes pruebas que se realizan para cada uno de los  conjuntos de datos.
 
-
+```
     ● Para nuestro proyecto emplearemos el modelo K-Fold Cross Validation Con una K = 10. 
     ● También utilizaremos el modelo Hold-Out con una división de  70% para entrenamiento y 30% para prueba el cual se repetirá  20 veces. 
     ● Para medir la efectividad de los modelos utilizaremos el método  de matriz de confusión. 
-
+```
 
 #Diseño de arquitectura
 
