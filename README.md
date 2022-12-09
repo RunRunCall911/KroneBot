@@ -243,14 +243,14 @@ Identifica si el paciente requirió ingresar a una Unidad de Cuidados Intensivos
 
 ```
 
-##Selección de los Datos 
+## Selección de los Datos 
 
 
 Selección de subconjuntos de datos (Muestreo) 
 Es necesario todos los datos y conjuntos para obtener la mejor precision posible ante diversos casos
 
 
-###Limpieza de Datos 
+### Limpieza de Datos 
 
 
 Eliminación de atributos con poca variabilidad
@@ -280,10 +280,10 @@ Eliminación de atributos con poca variabilidad
 ```
 
 
-#Modelado de datos
+# Modelado de datos
 
 
-##Selección de Técnicas de Modelado  
+## Selección de Técnicas de Modelado  
 
 
 Lista de las técnicas que se utilizarán para la evaluación del modelo  
@@ -295,7 +295,7 @@ Dado que nuestro problema es de clasificación usaremos los  siguientes algoritm
     ● También utilizaremos el algoritmo Tree árbol de decisión.
 ```
 
-##Generación de Plan de Prueba 
+## Generación de Plan de Prueba 
 
 
 Lista de las diferentes pruebas que se realizan para cada uno de los  conjuntos de datos.
@@ -306,10 +306,12 @@ Lista de las diferentes pruebas que se realizan para cada uno de los  conjuntos 
     ● Para medir la efectividad de los modelos utilizaremos el método  de matriz de confusión. 
 ```
 
-#Diseño de arquitectura
+# Diseño de arquitectura
 
 
-![K](images/image.png)
+<p align="center">
+   <img src="images/image.png" width="875"/>
+</p>
 
 
 ## Desarrollado
@@ -329,18 +331,22 @@ dentro del chat. Esta versión se trata de la aplicación de escritorio de teleg
 el mismo buscador de la aplicación para buscar el bot (@kroneebot).
 
 
-![K](images/kroneD1.png)
-![K](images/kroneD2.png)
+<p align="center">
+   <img src="images/kroneD1.png"/>
+</p>
+<p align="center">
+   <img src="images/kroneD2.png"/>
+</p>
 
 
-##Creado por
+## Creado por
 
 
   * Ronaldo Nuñez Gonzalez  (@RunRunCall911)
   * Adan Palacios Avelar    (@Adanpaa)
 
 
-##Conclusión (es)
+## Conclusión (es)
 
 
 Con este proyecto hemos aprendido a utilizar los bots en Telegram con ayuda de BotFather, dar opciones 
