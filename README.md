@@ -295,10 +295,9 @@ implementaron algunos elementos visuales, como seleccionar entre opciones con �
 dentro del chat. Esta versión se trata de la aplicación de escritorio de telegram. Se utiliza
 el mismo buscador de la aplicación para buscar el bot (@kroneebot).
 
-```Diseño de escritorio y app```
 <p align="center">
     <img width="800" src="./images/kroneD1.png">
-    <img width="500" src="./images/kroneeD2.png">
+    <img width="500" src="./images/kroneD2.png">
 </p>
 
 ##Creado por
